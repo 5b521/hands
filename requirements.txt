@@ -1,0 +1,3 @@
+autopy
+cvzone
+mediapipe
