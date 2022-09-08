@@ -1,3 +1,3 @@
 # hands
 
-jkjkl
+人工智障
