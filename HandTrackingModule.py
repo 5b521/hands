@@ -119,8 +119,7 @@ class handDetector():
         # 只记录四个手指是否并拢的值，从大拇指与食指到  无名指与小拇指
         FClose = []
         
-        if self.FUp:
-            self.fingersUp(hand_num)
+        self.fingersUp(hand_num)
 
         if self.findDistance(4,5,hand_num) < 3 and (self.FUp[0]&self.FUp[1]):
             FClose.append(1)
@@ -252,20 +251,20 @@ def main():
         lmList = detector.findPosition(img)  # 获取得到坐标点的列表
         if len(lmList) != 0:
             # print(detector.direction('Left'))
-            # direction = (np.array([2.6644276920706034, -10.098950751125813, 0.49987121019512415]), np.array([-3.408530307933688, -8.156183175742626, -0.8377106161788106]))
-            # if(detector.direction_same(direction,detector.direction('Left'),2)):
+            # direction = [[5.375117808580399, -9.055236307904124, -1.5031843446195126], [-0.8503671735525131, -7.541118375957012, -4.165707714855671]]
+            # if(detector.direction_same(direction,detector.direction('Left'),10)):
             #     print("good")
             # print(detector.results.multi_handedness[0].classification[0].label)
             # v1,v2 = detector.direction('Left')
             # print(v1,v2)
             # print(cx,cy,cz)
-            FClose = detector.close_together()
-            print(FClose[0])
+            # FClose = detector.close_together()
+            # print(FClose[0])
             # FUp = detector.fingersUp()
-            # FStraight = detector.fingersUp()
-            # for i in range(0,5):
-            #     if(FStraight[i] == 1):
-            #         cv2.circle(img, (lmList[(i+1)*4][1],lmList[(i+1)*4][2]), 15, (0, 0, 255), cv2.FILLED)
+            FStraight = detector.fingersUp()
+            for i in range(0,5):
+                if(FStraight[i] == 1):
+                    cv2.circle(img, (lmList[(i+1)*4][1],lmList[(i+1)*4][2]), 15, (0, 0, 255), cv2.FILLED)
             # if(FStraight[0] == 1):
             #     print("good")
             # else:

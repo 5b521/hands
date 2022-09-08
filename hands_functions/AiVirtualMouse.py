@@ -23,6 +23,7 @@ class Mouse():
         self.mouse_click = False
         self.detector = Detector
         self.wScr, self.hScr = autopy.screen.size()
+        self.toggle = False
     # print(wScr, hScr)
     # print((wCam - frameR, hCam - frameR))
     # 2. 判断食指和中指是否伸出
@@ -42,8 +43,17 @@ class Mouse():
         x2, y2 = self.detector.lmList[12][1:]
         # 3. 若只有食指伸出 则进入移动模式
         if self.fingers[1] and self.fingers[2] == False:
+            TClose = self.detector.thumb_close()
             # 4. 坐标转换： 将食指在窗口坐标转换为鼠标在桌面的坐标
             # 鼠标坐标
+
+            if TClose[0] == 1 and not self.toggle:
+                self.toggle = True
+                autopy.mouse.toggle(autopy.mouse.Button.LEFT, True)
+            elif TClose[0] == 0 and self.toggle:
+                self.toggle = False
+                autopy.mouse.toggle(autopy.mouse.Button.LEFT, False)
+
             x3 = np.interp(x1, (self.frameR, self.wCam - self.frameR), (0, self.wScr))
             y3 = np.interp(y1, (self.frameR, self.hCam - self.frameR), (0, self.hScr))
 
@@ -56,7 +66,7 @@ class Mouse():
             self.plocX, self.plocY = self.clocX, self.clocY
 
         # 5. 若是食指和中指都伸出 则检测指头距离 距离够短则对应鼠标点击
-        if self.fingers[1] and self.fingers[2]:
+        elif self.fingers[1] and self.fingers[2]:
             close = self.detector.close_together()
             # if close[1]:
             #     print(close[1])
