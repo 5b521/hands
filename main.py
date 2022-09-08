@@ -4,8 +4,6 @@ import HandTrackingModule as htm
 import autopy
 import numpy as np
 import time
-import win32api
-import win32con
 from hands_functions import AiVirtualMouse as mouse
 from features_record import hand_recognition as hr
 
@@ -19,7 +17,7 @@ def main():
     
     detector = htm.handDetector(maxHands=1)
     mouse_control = mouse.Mouse(wCam,hCam,detector)
-    lock_func = 0
+    lock_func = None
     run_func = 0
     lock = False
 

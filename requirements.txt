@@ -1,3 +1,4 @@
 autopy
 cvzone
 mediapipe
+keyboard

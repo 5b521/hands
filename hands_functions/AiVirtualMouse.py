@@ -5,8 +5,6 @@ import HandTrackingModule as htm
 import autopy
 import numpy as np
 import time
-import win32api
-import win32con
 
 # -1代表向下移动一个单位
 # win32api.mouse_event(win32con.MOUSEEVENTF_WHEEL,0,0,-1)
