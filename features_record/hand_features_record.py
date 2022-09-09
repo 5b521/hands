@@ -118,4 +118,7 @@ def features_record(tag):
 
 
 if __name__ == "__main__":
+    
     features_record('mouse')
+    # features_record('palm')  # 巴掌
+    # features_record('fist')  # 拳头
