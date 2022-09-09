@@ -55,7 +55,7 @@ with open(Path, encoding='utf-8', mode='r') as f:
 ############################################################################################################
 
 
-def hand_recognition(detector):
+def hand_recognition(detector, diff=10):
     hands = {}
     for i in range(len(detector.results.multi_handedness)):
         hands[detector.results.multi_handedness[i].classification[0].label] = fr.features_get(
@@ -70,7 +70,7 @@ def hand_recognition(detector):
                             and hands[right_left]['FUp'] == gesture[right_left]['FUp']\
                             and hands[right_left]['FClose'] == gesture[right_left]['FClose']\
                             and hands[right_left]['TClose'] == gesture[right_left]['TClose']\
-                            and detector.direction_same(gesture[right_left]["FDirection"], hands[right_left]["FDirection"], 10):
+                            and detector.direction_same(gesture[right_left]["FDirection"], hands[right_left]["FDirection"], diff):
                         return gesture['tag']
             else:
                 # 包含了 "Left", "Right" 和 "tag", 所以 len(gesture) == 3
@@ -81,12 +81,12 @@ def hand_recognition(detector):
                                 and hands[right_left]['FUp'] == gesture[right_left]['FUp']\
                                 and hands[right_left]['FClose'] == gesture[right_left]['FClose']\
                                 and hands[right_left]['TClose'] == gesture[right_left]['TClose']\
-                                and detector.direction_same(gesture[right_left]["FDirection"], hands[right_left]["FDirection"], 10):
+                                and detector.direction_same(gesture[right_left]["FDirection"], hands[right_left]["FDirection"], diff):
 
                             right_left = list(hands.keys())[1]
                             if hands[right_left]['FStraight'] == gesture[right_left]['FStraight']\
                                     and hands[right_left]['FUp'] == gesture[right_left]['FUp']\
                                     and hands[right_left]['FClose'] == gesture[right_left]['FClose']\
                                     and hands[right_left]['TClose'] == gesture[right_left]['TClose']\
-                                    and detector.direction_same(gesture[right_left]["FDirection"], hands[right_left]["FDirection"], 10):
+                                    and detector.direction_same(gesture[right_left]["FDirection"], hands[right_left]["FDirection"], diff):
                                 return gesture['tag']
