@@ -4,7 +4,26 @@ import cv2
 
 class HandsMove:
 
-    def __init__(self, detector):
+    def __init__(self, detector, onEnd=None):
+        '''
+        当手势识别结束时, 触发 onEnd 函数, 并传入一个 HandsMove 对象,
+        
+        你可以通过 HandsMove 对象的 result 属性获取识别结果,
+        还有 useful 属性, 用于判断识别结果是否有用, "水平波动" 等结果被认为是没有用的.
+
+        例如回调函数可以写为:
+
+        def onEnd(handsMove):
+            if handsMove.useful:
+                print(handsMove.result)
+        
+        你还可以使用 HandsMove 对象的 track 属性获取手势的轨迹等.
+        '''
+
+        # 回调函数
+        self.onEnd = onEnd
+        self.result = None
+        self.useful = False
 
         # 时间间隔, 单位变化或坐标变化阈值
         self.delayTime = 0.1
@@ -35,10 +54,10 @@ class HandsMove:
         self.lock = True
 
     def end(self, result, useful=True):
-        if useful:
-            print(result)
         self.result = result
         self.useful = useful
+        if callable(self.onEnd):
+            self.onEnd(self)
         self.lock = False
 
     def handleOriginChange(self):
