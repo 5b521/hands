@@ -1,145 +1,160 @@
 import time
-import numpy as np
-import autopy
-import HandTrackingModule as htm
 import cv2
-from this import d
-import sys
-sys.path.append("..")
 
 
-# 时间间隔, 单位变化或坐标变化阈值
-delayTime = 0.1
-unitChange = 30
-distFromOrigin = 0.3
-posChange = 0.1
-blockWidth = 0.3
+class HandsMove:
 
-# 原点, 超过一秒钟固定在同一个地方就作为新原点, 以及单位长度
-standardUnit = 10
-originPos = [200, 200]
+    def __init__(self, detector):
 
-# 上一秒钟的坐标与单位长度
-lastTime = 0
-lastUnit = 100
-lastPos = [0, 0]
+        # 时间间隔, 单位变化或坐标变化阈值
+        self.delayTime = 0.1
+        self.unitChange = 30
+        self.distFromOrigin = 0.3
+        self.posChange = 0.1
+        self.blockWidth = 0.3
 
-# 记录的轨迹
-track = []
-count = 0
+        # 原点, 超过一秒钟固定在同一个地方就作为新原点, 以及单位长度
+        self.standardUnit = 10
+        self.originPos = [200, 200]
 
+        # 上一秒钟的坐标与单位长度
+        self.lastTime = 0
+        self.lastUnit = 100
+        self.lastPos = [0, 0]
 
-def handleUnitChange():
-    '''
-    当单位长度发生变化时, 触发的函数, 进行一系列处理
-    '''
-    # print('unit change')
-    pass
+        # 记录的轨迹
+        self.track = []
 
+        # 手势识别
+        self.pTime = 0
+        self.cTime = 0
+        self.cap = cv2.VideoCapture(0)
+        self.detector = detector
 
-def handleOriginChange():
-    '''
-    当原点发生变化时, 触发的函数, 进行一系列处理
-    '''
-    global track, count
-    if len(track) == 0 or len(track) == 1:
-        track.clear()
-        return
-    count += 1
-    print(f'{count}: ', end='')
-    if max(tr[3] for tr in track) - min(tr[3] for tr in track) < 2:
-        if all(tr[1] == track[0][1] for tr in track):
-            if all(track[i][2] < track[i + 1][2] for i in range(len(track) - 1)) \
-                    or all(track[i][2] > track[i + 1][2] for i in range(len(track) - 1)):
-                if abs(track[-1][2] - track[0][2]) >= 2:
-                    if track[-1][2] > track[0][2]:
-                        print('垂直向下')
-                    else:
-                        print('垂直向上')
+        # 是否仍然继续识别
+        self.lock = True
+
+    def end(self, result, useful=True):
+        if useful:
+            print(result)
+        self.result = result
+        self.useful = useful
+        self.lock = False
+
+    def handleOriginChange(self):
+        '''
+        当原点发生变化时, 触发的函数, 进行一系列处理
+        '''
+        if len(self.track) == 0 or len(self.track) == 1:
+            self.track.clear()
+            return
+        # z 轴变化较小
+        if max(tr[3] for tr in self.track) - min(tr[3] for tr in self.track) < 2:
+            # 垂直方向变化较小
+            if all(abs(tr[1] - self.track[0][1]) < 3 for tr in self.track):
+                # 单调递减或单调递增
+                if all(self.track[i][2] <= self.track[i + 1][2] for i in range(len(self.track) - 1)) \
+                        or all(self.track[i][2] >= self.track[i + 1][2] for i in range(len(self.track) - 1)):
+                    # 超过一定的长度
+                    if abs(self.track[-1][2] - self.track[0][2]) >= 2:
+                        if self.track[-1][2] > self.track[0][2]:
+                            self.end('垂直向下')
+                        else:
+                            self.end('垂直向上')
+                # 不单调递减或单调递增, 则为波动
+                else:
+                    self.end('垂直波动', False)
+            # 水平方向变化较小
+            elif all(tr[2] == self.track[0][2] for tr in self.track):
+                if all(self.track[i][1] <= self.track[i + 1][1] for i in range(len(self.track) - 1)) \
+                        or all(self.track[i][1] >= self.track[i + 1][1] for i in range(len(self.track) - 1)):
+                    if abs(self.track[-1][1] - self.track[0][1]) >= 2:
+                        if self.track[-1][1] > self.track[0][1]:
+                            self.end('水平向左')
+                        else:
+                            self.end('水平向右')
+                else:
+                    self.end('水平波动', False)
+            # 倾斜(左/右)(上/下)
             else:
-                print('垂直波动')
-        elif all(tr[2] == track[0][2] for tr in track):
-            if all(track[i][1] < track[i + 1][1] for i in range(len(track) - 1)) \
-                    or all(track[i][1] > track[i + 1][1] for i in range(len(track) - 1)):
-                if abs(track[-1][1] - track[0][1]) >= 2:
-                    if track[-1][1] > track[0][1]:
-                        print('水平向左')
-                    else:
-                        print('水平向右')
-            else:
-                print('水平波动')
-    else:
-        def getZStr():
-            return '出拳' if track[-1][3] > track[0][3] else '收拳'
-        if abs(track[-1][1] - track[0][1]) >= 3:
-            print('水平' + getZStr())
-        elif abs(track[-1][2] - track[0][2]) >= 3:
-            print('垂直' + getZStr())
+                if (all(self.track[i][1] <= self.track[i + 1][1] for i in range(len(self.track) - 1)) \
+                        or all(self.track[i][1] >= self.track[i + 1][1] for i in range(len(self.track) - 1))) \
+                    or (all(self.track[i][2] <= self.track[i + 1][2] for i in range(len(self.track) - 1)) \
+                        or all(self.track[i][2] >= self.track[i + 1][2] for i in range(len(self.track) - 1))):
+                    if abs(self.track[-1][1] - self.track[0][1]) >= 3 and abs(self.track[-1][2] - self.track[0][2]) >= 3:
+                        if self.track[-1][2] > self.track[0][2]:
+                            if self.track[-1][1] > self.track[0][1]:
+                                self.end('倾斜左下')
+                            else:
+                                self.end('倾斜右下')
+                        else:
+                            if self.track[-1][1] > self.track[0][1]:
+                                self.end('倾斜左上')
+                            else:
+                                self.end('倾斜右上')
         else:
-            print(getZStr())
-    track.clear()
+            def getZStr():
+                return '出拳' if self.track[-1][3] > self.track[0][3] else '收拳'
+            if abs(self.track[-1][1] - self.track[0][1]) >= 3:
+                self.end('水平' + getZStr())
+            elif abs(self.track[-1][2] - self.track[0][2]) >= 3:
+                self.end('垂直' + getZStr())
+            else:
+                self.end(getZStr())
+        self.track.clear()
+        self.end('未识别到手势', False)
 
+    def isLock(self, img):
+        self.img = img
+        return self.lock
 
-##############################
-pTime = 0
-cTime = 0
-cap = cv2.VideoCapture(0)
-detector = htm.handDetector()
-while True:
-    success, img = cap.read()
-    img = detector.findHands(img)        # 检测手势并画上骨架信息
-    h, w, c = img.shape
+    def handleChange(self):
 
-    lmList = detector.findPosition(img)  # 获取得到坐标点的列表
-    unit = detector.getStandardUnit(img)  # 获取标准单位
-    # if len(lmList) != 0:
-    #     print(lmList[4])
+        self.cTime = time.time()
 
-    ########################################
+        h, w, c = self.img.shape
 
-    # 根据原点和单位绘制网格图
-    cv2.line(img, (max(0, int(originPos[0] - standardUnit)), originPos[1]), (min(
-        w, int(originPos[0] + standardUnit)), originPos[1]), (255, 0, 255), 2)
-    cv2.line(img, (originPos[0], max(0, int(originPos[1] - standardUnit))),
-             (originPos[0], min(h, int(originPos[1] + standardUnit))), (255, 0, 255), 2)
+        lmList = self.detector.findPosition(self.img)  # 获取得到坐标点的列表
+        self.unit = self.detector.getStandardUnit(self.img)  # 获取标准单位
+        # if len(lmList) != 0:
+        #     print(lmList[4])
 
-    if lmList:
-        # 手腕坐标
-        wristPos = lmList[0]
+        # 根据原点和单位绘制网格图
+        cv2.line(self.img, (max(0, int(self.originPos[0] - self.standardUnit)), self.originPos[1]), (min(
+            w, int(self.originPos[0] + self.standardUnit)), self.originPos[1]), (255, 0, 255), 2)
+        cv2.line(self.img, (self.originPos[0], max(0, int(self.originPos[1] - self.standardUnit))),
+                 (self.originPos[0], min(h, int(self.originPos[1] + self.standardUnit))), (255, 0, 255), 2)
 
-        # 超过一秒
-        if cTime - lastTime > delayTime:
-            # print(track)
-            # 单位发生较大变化, 更新单位长度
-            if abs(unit - standardUnit) > unitChange:
-                handleUnitChange()
-                standardUnit = lastUnit
-            # 坐标相对原点发生变化, 但相对上一秒坐标没有发生较大变化, 则更新坐标
-            if (abs(wristPos[1] - originPos[0]) / unit > distFromOrigin or abs(wristPos[2] - originPos[1]) / unit > distFromOrigin) \
-                    and abs(wristPos[1] - lastPos[0]) / unit < posChange and abs(wristPos[2] - lastPos[1]) / unit < posChange:
-                handleOriginChange()
-                originPos = lastPos
-            # 更新上一秒的信息
-            lastTime = cTime
-            lastUnit = unit
-            lastPos = [wristPos[1], wristPos[2]]
+        if lmList:
+            # 手腕坐标
+            wristPos = lmList[0]
 
-        # 获取当前网格块和深度
-        blockPos = [int((wristPos[1] - originPos[0]) / standardUnit / blockWidth),
-                    int((wristPos[2] - originPos[1]) /
-                        standardUnit / blockWidth),
-                    int(standardUnit / unitChange)]
+            # 超过一秒
+            if self.cTime - self.lastTime > self.delayTime:
+                # print(track)
+                # 单位发生较大变化, 更新单位长度
+                if abs(self.unit - self.standardUnit) > self.unitChange:
+                    self.standardUnit = self.lastUnit
+                # 坐标相对原点发生变化, 但相对上一秒坐标没有发生较大变化, 则更新坐标, 表明结束
+                if (abs(wristPos[1] - self.originPos[0]) / self.unit > self.distFromOrigin or abs(wristPos[2] - self.originPos[1]) / self.unit > self.distFromOrigin) \
+                        and abs(wristPos[1] - self.lastPos[0]) / self.unit < self.posChange and abs(wristPos[2] - self.lastPos[1]) / self.unit < self.posChange:
+                    self.handleOriginChange()
+                    self.originPos = self.lastPos
+                # 更新上一秒的信息
+                self.lastTime = self.cTime
+                self.lastUnit = self.unit
+                self.lastPos = [wristPos[1], wristPos[2]]
 
-        if not track or track[-1][1] != blockPos[0] or track[-1][2] != blockPos[1] or track[-1][3] != blockPos[2]:
-            track.append([cTime, blockPos[0], blockPos[1], blockPos[2]])
+            # 获取当前网格块和深度
+            blockPos = [int((wristPos[1] - self.originPos[0]) / self.standardUnit / self.blockWidth),
+                        int((wristPos[2] - self.originPos[1]) /
+                            self.standardUnit / self.blockWidth),
+                        int(self.standardUnit / self.unitChange)]
 
-    ########################################
+            if not self.track or self.track[-1][1] != blockPos[0] or self.track[-1][2] != blockPos[1] or self.track[-1][3] != blockPos[2]:
+                self.track.append(
+                    [self.cTime, blockPos[0], blockPos[1], blockPos[2]])
 
-    cTime = time.time()
-    fps = 1 / (cTime - pTime)
-    pTime = cTime
+        return self.img
 
-    cv2.putText(img, 'fps:' + str(int(fps)), (10, 70),
-                cv2.FONT_HERSHEY_PLAIN, 3, (255, 0, 255), 3)
-    cv2.imshow('Image', img)
-    cv2.waitKey(1)
+        

@@ -5,6 +5,7 @@ import autopy
 import numpy as np
 import time
 from hands_functions import AiVirtualMouse as mouse
+from hands_functions import handsMove
 from features_record import hand_recognition as hr
 
 
@@ -18,6 +19,7 @@ def main():
 
     detector = htm.handDetector(maxHands=1)
     mouse_control = mouse.Mouse(wCam, hCam, detector)
+    hands_move_control = handsMove.HandsMove(detector)
     lock_func = None
     run_func = 0
     lock = False
@@ -37,15 +39,21 @@ def main():
                 gesture = hr.hand_recognition(detector)
                 if (gesture == 'mouse'):
                     lock_func = mouse_control.is_mouse_gesture
-                    lock = lock_func(img)
                     run_func = mouse_control.move_mouse
-                    img = mouse_control.move_mouse()
+                elif (gesture == 'palm'):
+                    lock_func = hands_move_control.isLock
+                    run_func = hands_move_control.handleChange
+                if lock_func and run_func:
+                    lock = lock_func(img)
+                    img = run_func()
             else:
                 lock = lock_func(img)
                 if lock:
                     img = run_func()
         else:
             lock = False
+            lock_func = None
+            run_func = None
 
         cTime = time.time()
         fps = 1 / (cTime - pTime)
