@@ -19,7 +19,7 @@ def main():
 
     detector = htm.handDetector(maxHands=1)
     mouse_control = mouse.Mouse(wCam, hCam, detector)
-    hands_move_control = handsMove.HandsMove(detector, lambda res: print(res.result) if res.useful else None)
+    hands_move_control = handsMove.HandsMove(detector, lambda res: print('执行了一个功能') if res.result == '水平向右' else None)
     lock_func = None
     run_func = 0
     lock = False

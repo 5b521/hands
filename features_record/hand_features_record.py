@@ -99,7 +99,7 @@ def features_record(tag):
             if key.is_pressed('q'):
                 record_features['tag'] = tag
                 gesture_map[tag] = record_features
-                json_str = json.dumps(list(gesture_map.values()))
+                json_str = json.dumps(list(gesture_map.values()), indent=4, ensure_ascii=False)
 
                 with open(Path, "w") as f:
                     f.write(json_str)
