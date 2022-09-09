@@ -24,6 +24,8 @@ class Mouse():
         self.detector = Detector
         self.wScr, self.hScr = autopy.screen.size()
         self.toggle = False
+        self.delay = 0.5
+        self.press_time = 0
     # print(wScr, hScr)
     # print((wCam - frameR, hCam - frameR))
     # 2. 判断食指和中指是否伸出
@@ -44,42 +46,46 @@ class Mouse():
         x1, y1 = self.detector.lmList[8][1:]
         x2, y2 = self.detector.lmList[12][1:]
         # 3. 若只有食指伸出 则进入移动模式
-        if self.fingers[1] and self.fingers[2] == False:
-            TClose = self.detector.thumb_close()
-            # 4. 坐标转换： 将食指在窗口坐标转换为鼠标在桌面的坐标
-            # 鼠标坐标
+        if self.fingers[1]:
 
+            # 鼠标按下和放开
+            close = self.detector.close_together()
+
+            if self.fingers[2] and close[1] and not self.mouse_click:
+                self.mouse_click = True
+                autopy.mouse.toggle(autopy.mouse.Button.LEFT, True)
+                self.press_time = time.time()
+            elif (self.fingers[2] and not close[1] or not self.fingers[2]) and self.mouse_click:
+                self.mouse_click = False
+                autopy.mouse.toggle(autopy.mouse.Button.LEFT, False)
+
+            # 另一种拖动
+            TClose = self.detector.thumb_close()
             if TClose[0] == 1 and not self.toggle:
                 self.toggle = True
                 autopy.mouse.toggle(autopy.mouse.Button.LEFT, True)
+                self.press_time = time.time()
             elif TClose[0] == 0 and self.toggle:
                 self.toggle = False
                 autopy.mouse.toggle(autopy.mouse.Button.LEFT, False)
 
-            x3 = np.interp(x1, (self.frameR, self.wCam -
-                           self.frameR), (0, self.wScr))
-            y3 = np.interp(y1, (self.frameR, self.hCam -
-                           self.frameR), (0, self.hScr))
 
-            # smoothening values
-            self.clocX = self.plocX + (x3 - self.plocX) / self.smoothening
-            self.clocY = self.plocY + (y3 - self.plocY) / self.smoothening
+            if not (self.fingers[1] and self.fingers[2] and not close[1]) and (time.time() - self.press_time > self.delay):
+                    
+                # 4. 坐标转换： 将食指在窗口坐标转换为鼠标在桌面的坐标
+                # 鼠标坐标
+                x3 = np.interp(x1, (self.frameR, self.wCam -
+                            self.frameR), (0, self.wScr))
+                y3 = np.interp(y1, (self.frameR, self.hCam -
+                            self.frameR), (0, self.hScr))
 
-            autopy.mouse.move(self.wScr - self.clocX, self.clocY)
-            cv2.circle(self.img, (x1, y1), 15, (255, 0, 255), cv2.FILLED)
-            self.plocX, self.plocY = self.clocX, self.clocY
+                # smoothening values
+                self.clocX = self.plocX + (x3 - self.plocX) / self.smoothening
+                self.clocY = self.plocY + (y3 - self.plocY) / self.smoothening
 
-        # 5. 若是食指和中指都伸出 则检测指头距离 距离够短则对应鼠标点击
-        elif self.fingers[1] and self.fingers[2]:
-            close = self.detector.close_together()
-            # if close[1]:
-            #     print(close[1])
-            if close[1] and not self.mouse_click:
-                # cv2.circle(img, (pointInfo[4], pointInfo[5]),
-                #            15, (0, 255, 0), cv2.FILLED)
-                autopy.mouse.click()
-                self.mouse_click = True
-            elif not close[1]:
-                self.mouse_click = False
+                autopy.mouse.move(self.wScr - self.clocX, self.clocY)
+                cv2.circle(self.img, (x1, y1), 15, (255, 0, 255), cv2.FILLED)
+                self.plocX, self.plocY = self.clocX, self.clocY
+
 
         return self.img
