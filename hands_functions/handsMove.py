@@ -1,11 +1,11 @@
+import time
+import numpy as np
+import autopy
+import HandTrackingModule as htm
+import cv2
+from this import d
 import sys
 sys.path.append("..")
-from this import d
-import cv2
-import HandTrackingModule as htm
-import autopy
-import numpy as np
-import time
 
 
 # 时间间隔, 单位变化或坐标变化阈值
@@ -28,12 +28,14 @@ lastPos = [0, 0]
 track = []
 count = 0
 
+
 def handleUnitChange():
     '''
     当单位长度发生变化时, 触发的函数, 进行一系列处理
     '''
     # print('unit change')
     pass
+
 
 def handleOriginChange():
     '''
@@ -48,7 +50,7 @@ def handleOriginChange():
     if max(tr[3] for tr in track) - min(tr[3] for tr in track) < 2:
         if all(tr[1] == track[0][1] for tr in track):
             if all(track[i][2] < track[i + 1][2] for i in range(len(track) - 1)) \
-                or all(track[i][2] > track[i + 1][2] for i in range(len(track) - 1)):
+                    or all(track[i][2] > track[i + 1][2] for i in range(len(track) - 1)):
                 if abs(track[-1][2] - track[0][2]) >= 2:
                     if track[-1][2] > track[0][2]:
                         print('垂直向下')
@@ -58,7 +60,7 @@ def handleOriginChange():
                 print('垂直波动')
         elif all(tr[2] == track[0][2] for tr in track):
             if all(track[i][1] < track[i + 1][1] for i in range(len(track) - 1)) \
-                or all(track[i][1] > track[i + 1][1] for i in range(len(track) - 1)):
+                    or all(track[i][1] > track[i + 1][1] for i in range(len(track) - 1)):
                 if abs(track[-1][1] - track[0][1]) >= 2:
                     if track[-1][1] > track[0][1]:
                         print('水平向左')
@@ -76,6 +78,7 @@ def handleOriginChange():
         else:
             print(getZStr())
     track.clear()
+
 
 ##############################
 pTime = 0
@@ -95,8 +98,10 @@ while True:
     ########################################
 
     # 根据原点和单位绘制网格图
-    cv2.line(img, (max(0, int(originPos[0] - standardUnit)), originPos[1]), (min(w, int(originPos[0] + standardUnit)), originPos[1]), (255, 0, 255), 2)
-    cv2.line(img, (originPos[0], max(0, int(originPos[1] - standardUnit))), (originPos[0], min(h, int(originPos[1] + standardUnit))), (255, 0, 255), 2)
+    cv2.line(img, (max(0, int(originPos[0] - standardUnit)), originPos[1]), (min(
+        w, int(originPos[0] + standardUnit)), originPos[1]), (255, 0, 255), 2)
+    cv2.line(img, (originPos[0], max(0, int(originPos[1] - standardUnit))),
+             (originPos[0], min(h, int(originPos[1] + standardUnit))), (255, 0, 255), 2)
 
     if lmList:
         # 手腕坐标
@@ -111,7 +116,7 @@ while True:
                 standardUnit = lastUnit
             # 坐标相对原点发生变化, 但相对上一秒坐标没有发生较大变化, 则更新坐标
             if (abs(wristPos[1] - originPos[0]) / unit > distFromOrigin or abs(wristPos[2] - originPos[1]) / unit > distFromOrigin) \
-                and abs(wristPos[1] - lastPos[0]) / unit < posChange and abs(wristPos[2] - lastPos[1]) / unit < posChange:
+                    and abs(wristPos[1] - lastPos[0]) / unit < posChange and abs(wristPos[2] - lastPos[1]) / unit < posChange:
                 handleOriginChange()
                 originPos = lastPos
             # 更新上一秒的信息
@@ -121,8 +126,9 @@ while True:
 
         # 获取当前网格块和深度
         blockPos = [int((wristPos[1] - originPos[0]) / standardUnit / blockWidth),
-             int((wristPos[2] - originPos[1]) / standardUnit / blockWidth),
-             int(standardUnit / unitChange)]
+                    int((wristPos[2] - originPos[1]) /
+                        standardUnit / blockWidth),
+                    int(standardUnit / unitChange)]
 
         if not track or track[-1][1] != blockPos[0] or track[-1][2] != blockPos[1] or track[-1][3] != blockPos[2]:
             track.append([cTime, blockPos[0], blockPos[1], blockPos[2]])
@@ -137,4 +143,3 @@ while True:
                 cv2.FONT_HERSHEY_PLAIN, 3, (255, 0, 255), 3)
     cv2.imshow('Image', img)
     cv2.waitKey(1)
-

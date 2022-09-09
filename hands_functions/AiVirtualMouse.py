@@ -1,10 +1,10 @@
+import time
+import numpy as np
+import autopy
+import HandTrackingModule as htm
+import cv2
 import sys
 sys.path.append("..")
-import cv2
-import HandTrackingModule as htm
-import autopy
-import numpy as np
-import time
 
 # -1代表向下移动一个单位
 # win32api.mouse_event(win32con.MOUSEEVENTF_WHEEL,0,0,-1)
@@ -12,7 +12,7 @@ import time
 
 class Mouse():
 
-    def __init__(self,wCam,hCam,Detector):
+    def __init__(self, wCam, hCam, Detector):
 
         self.frameR = 150
         self.smoothening = 5
@@ -27,6 +27,7 @@ class Mouse():
     # print(wScr, hScr)
     # print((wCam - frameR, hCam - frameR))
     # 2. 判断食指和中指是否伸出
+
     def is_mouse_gesture(self, img):
         self.img = img
         self.fingers = self.detector.fingersStraight()
@@ -34,10 +35,11 @@ class Mouse():
             return True
         else:
             return False
-    
+
     def move_mouse(self):
-        
-        cv2.rectangle(self.img, (self.frameR, self.frameR), (self.wCam - self.frameR, self.hCam - self.frameR), (0, 255, 0), 2,  cv2.FONT_HERSHEY_PLAIN)
+
+        cv2.rectangle(self.img, (self.frameR, self.frameR), (self.wCam - self.frameR,
+                      self.hCam - self.frameR), (0, 255, 0), 2,  cv2.FONT_HERSHEY_PLAIN)
 
         x1, y1 = self.detector.lmList[8][1:]
         x2, y2 = self.detector.lmList[12][1:]
@@ -54,8 +56,10 @@ class Mouse():
                 self.toggle = False
                 autopy.mouse.toggle(autopy.mouse.Button.LEFT, False)
 
-            x3 = np.interp(x1, (self.frameR, self.wCam - self.frameR), (0, self.wScr))
-            y3 = np.interp(y1, (self.frameR, self.hCam - self.frameR), (0, self.hScr))
+            x3 = np.interp(x1, (self.frameR, self.wCam -
+                           self.frameR), (0, self.wScr))
+            y3 = np.interp(y1, (self.frameR, self.hCam -
+                           self.frameR), (0, self.hScr))
 
             # smoothening values
             self.clocX = self.plocX + (x3 - self.plocX) / self.smoothening
@@ -77,7 +81,5 @@ class Mouse():
                 self.mouse_click = True
             elif not close[1]:
                 self.mouse_click = False
-        
+
         return self.img
-
-

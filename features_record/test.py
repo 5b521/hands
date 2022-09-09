@@ -1,4 +1,5 @@
 
+import HandTrackingModule
 import cv2
 import autopy
 import numpy as np
@@ -8,7 +9,6 @@ import json
 import keyboard as key
 import sys
 sys.path.append('..')
-import HandTrackingModule
 
 absolutepath = os.path.abspath(__file__)
 file_dir = os.path.dirname(absolutepath)
@@ -33,7 +33,6 @@ Path = os.path.join(file_dir, 'hand_features.json')
 #         dict = json.loads(pinyin_str)
 
 # print(dict)
-
 
 
 print(sys.path)
