@@ -15,8 +15,7 @@ f = open(Path, encoding='utf-8', mode='r')
 gestures = []
 
 with open(Path, encoding='utf-8', mode='r') as f:
-    for pinyin_str in f.readlines():
-        gestures.append(json.loads(pinyin_str))
+    gestures = json.loads(f.read())
 
 
 # def gesture_same(hands,gestures):

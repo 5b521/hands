@@ -5,15 +5,23 @@ import time
 import numpy as np
 import autopy
 import cv2
-import HandTrackingModule as htm
 import sys
 sys.path.append("..")
+import HandTrackingModule as htm
 
 absolutepath = os.path.abspath(__file__)
 file_dir = os.path.dirname(absolutepath)
 
 Path = os.path.join(file_dir, 'hand_features.json')
-
+gestures = []
+with open(Path, encoding='utf-8', mode='r') as f:
+    try:
+        gestures = json.loads(f.read())
+    except:
+        pass
+gesture_map = {}
+for gesture in gestures:
+    gesture_map[gesture['tag']] = gesture
 
 def features_get(detector: htm, hand_num=0):
 
@@ -90,7 +98,8 @@ def features_record(tag):
                 continue
             if key.is_pressed('q'):
                 record_features['tag'] = tag
-                json_str = json.dumps(record_features)
+                gesture_map[tag] = record_features
+                json_str = json.dumps(list(gesture_map.values()))
 
                 with open(Path, "w") as f:
                     f.write(json_str)
