@@ -5,6 +5,13 @@ import time
 import math
 import numpy as np
 
+# self.results.multi_hand_world_landmarks
+# 以手的几何中心为原点建立三维坐标系
+
+# self.results.multi_hand_landmarks
+# x 和 y 值被规范到 [0.0, 1.0]，表示在img上的位置
+# z 值以手腕为原点，表示深度，z 值越小离摄像头越近
+
 
 class handDetector():
     def __init__(self, mode=False, maxHands=1, model_complexity=1, detectionCon=0.8, trackCon=0.8):
@@ -23,8 +30,27 @@ class handDetector():
         imgRGB = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
         self.results = self.hands.process(imgRGB)
 
-        # print(self.results.multi_handedness)  # 获取检测结果中的左右手标签并打印
+        # build hands dict, an example
+        # {
+        #     "Detected": 2,
+        #     "Left": [0,],
+        #     "Right": [1,],
+        #     0: "Left",
+        #     1: "Right"
+        # }
+        self.hdDict = {"Detected": 0, "Left": [], "Right": []}
+        if self.results.multi_handedness:
+            for handedness in self.results.multi_handedness:
+                # hands to id, 1-multi
+                if handedness.classification[0].label == "Left":
+                    self.hdDict["Left"].append(handedness.classification[0].index)
+                elif handedness.classification[0].label == "Right":
+                    self.hdDict["Right"].append(handedness.classification[0].index)
+                # id to hands, 1-1
+                self.hdDict[handedness.classification[0].index] = handedness.classification[0].label
+                self.hdDict["Detected"] += 1
 
+        # draw hand connections
         if self.results.multi_hand_landmarks:
             for handLms in self.results.multi_hand_landmarks:
                 if draw:
@@ -240,18 +266,46 @@ class handDetector():
                   ** 2 + ((d2.z - d1.z)/5)**2)**0.5
 
         return length*100
+    
+    def findEvelation(self, hand_num1, p1, hand_num2, p2, img=None, draw_func=None):
+        '''
+        计算两个 landmark 之间连线的仰角，返回角度值和仰角角心所在的手
+        draw_func: 绘画函数
+        '''
+        if len(self.lmList) != 0:
+            d1x, d1y = self.lmList[hand_num1*21 + p1][1:]
+            d2x, d2y = self.lmList[hand_num2*21 + p2][1:]
 
+            lower_hand = self.hdDict[hand_num1]
+            if hand_num1 != hand_num2: # means detect 2 hands
+                if d1y > d2y:
+                    lower_hand = self.hdDict[hand_num2]
+
+            if draw_func:
+                draw_func(img, d1x, d1y, d2x, d2y)
+
+            return math.degrees(math.atan2(d2y - d1y, d2x - d1x)), lower_hand
+            return math.degrees(math.atan(abs(d2y - d1y) / abs(d2x - d1x))), lower_hand
+        else:
+            return -1, "None"
 
 def main():
     pTime = 0
     cTime = 0
     cap = cv2.VideoCapture(0)
     detector = handDetector()
+    # detector = handDetector(maxHands=2)
     while True:
         success, img = cap.read()
         img = detector.findHands(img)        # 检测手势并画上骨架信息
 
         lmList = detector.findPosition(img)  # 获取得到坐标点的列表
+
+        # Elevation test
+        # if detector.hdDict["Detected"] == 2:
+        #     print(detector.findEvelation(0, 8, 1, 8, img, 
+        #                         draw_func=lambda img, x1, y1, x2, y2: cv2.line(img, (x1, y1), (x2, y2), (0, 255, 255), 3)))
+
         if len(lmList) != 0:
             # print(detector.direction('Left'))
             # direction = [[5.375117808580399, -9.055236307904124, -1.5031843446195126], [-0.8503671735525131, -7.541118375957012, -4.165707714855671]]
