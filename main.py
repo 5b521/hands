@@ -20,9 +20,11 @@ def main():
     detector = htm.handDetector(maxHands=1)
     mouse_control = mouse.Mouse(wCam, hCam, detector)
     hands_move_control = handsMove.HandsMove(detector, lambda res: print('执行了一个功能') if res.result == '水平向右' else None)
+    start_func = None
     lock_func = None
-    run_func = 0
+    run_func = None
     lock = False
+    frame_count = 0
 
     while True:
 
@@ -41,19 +43,27 @@ def main():
                     lock_func = mouse_control.is_mouse_gesture
                     run_func = mouse_control.move_mouse
                 elif (gesture == 'palm'):
+                    start_func = hands_move_control.start
                     lock_func = hands_move_control.isLock
                     run_func = hands_move_control.handleChange
                 if lock_func and run_func:
+                    if start_func:
+                        start_func(img)
                     lock = lock_func(img)
                     img = run_func()
+                    
             else:
                 lock = lock_func(img)
                 if lock:
                     img = run_func()
         else:
-            lock = False
-            lock_func = None
-            run_func = None
+            if frame_count > 10:
+                lock = False
+                start_func = None
+                lock_func = None
+                run_func = None
+                frame_count = 0
+            frame_count += 1
 
         cTime = time.time()
         fps = 1 / (cTime - pTime)

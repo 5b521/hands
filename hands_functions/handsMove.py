@@ -51,7 +51,16 @@ class HandsMove:
         self.detector = detector
 
         # 是否仍然继续识别
+        self.lock = False
+
+    def start(self, img):
         self.lock = True
+        self.img = img
+        lmList = self.detector.findPosition(img)  # 获取得到坐标点的列表
+        self.standardUnit = self.detector.getStandardUnit(self.img)  # 获取标准单位
+        self.originPos = [lmList[0][1], lmList[0][2]]  # 获取原点坐标
+        self.lastUnit = self.standardUnit
+        self.lastPos = self.originPos
 
     def end(self, result, useful=True):
         self.result = result
