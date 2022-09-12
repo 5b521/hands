@@ -6,6 +6,7 @@ import numpy as np
 import time
 from hands_functions import AiVirtualMouse as mouse
 from hands_functions import handsMove
+from hands_functions import volumeControl
 from features_record import hand_recognition as hr
 
 
@@ -20,7 +21,7 @@ def main():
     detector = htm.handDetector(maxHands=1)
     mouse_control = mouse.Mouse(wCam, hCam, detector)
     hands_move_control = handsMove.HandsMove(detector, lambda res: print('执行了一个功能') if res.result == '水平向右' else None)
-    start_func = None
+    volume_control = volumeControl.systemVolumeControler(detector)
     lock_func = None
     run_func = None
     lock = False
@@ -46,6 +47,9 @@ def main():
                     start_func = hands_move_control.start
                     lock_func = hands_move_control.isLock
                     run_func = hands_move_control.handleChange
+                elif (gesture == 'volume'):
+                    lock_func = volume_control.is_volume_control
+                    run_func = volume_control.run_volume_control
                 if lock_func and run_func:
                     if start_func:
                         start_func(img)

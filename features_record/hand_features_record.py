@@ -14,11 +14,12 @@ file_dir = os.path.dirname(absolutepath)
 
 Path = os.path.join(file_dir, 'hand_features.json')
 gestures = []
-with open(Path, encoding='utf-8', mode='r') as f:
-    try:
-        gestures = json.loads(f.read())
-    except:
-        pass
+if os.path.exists(Path):
+    with open(Path, encoding='utf-8', mode='r') as f:
+        try:
+            gestures = json.loads(f.read())
+        except:
+            pass
 gesture_map = {}
 for gesture in gestures:
     gesture_map[gesture['tag']] = gesture
@@ -40,13 +41,13 @@ def features_get(detector: htm, hand_num=0):
 ############################################################################################################
 # {
 #   "Left": {
-#     "FStraight": [1, 1, 0, 0, 0],
-#     "FUp": [0, 1, 0, 0, 0],
-#     "FClose": [0, 0, 0, 0],
-#     "TClose": [0, 0, 0, 0],
+#     "FStraight": [1, 1, 0, 0, 0], # 1代表手指直立，0代表手指弯曲
+#     "FUp": [0, 1, 0, 0, 0], # 1代表手指偏，0代表手指偏下
+#     "FClose": [0, 0, 0, 0], # 1代表两指靠近（并拢），0代表两指分开
+#     "TClose": [0, 0, 0, 0], # 1代表拇指靠近某个手指（指尖）
 #     "FDirection": [
-#       [2.90554640814662, -10.294727422297, -2.5022588670253754],
-#       [-2.2675693966448307, -6.620354764163494, -6.000513210892677]
+#       [2.90554640814662, -10.294727422297, -2.5022588670253754], # vector, landmark 0 to 5
+#       [-2.2675693966448307, -6.620354764163494, -6.000513210892677] # vector, landmark 0 to 7
 #     ]
 #   },
 #   "tag": "mouse"
@@ -107,6 +108,11 @@ def features_record(tag):
                     print("success")
                 return record_features
 
+        # 终端输出手势信息
+        # if len(land_mark_List) != 0:
+        #     curr_features = features_get(detector, 0)
+        #     print(curr_features)
+
         cTime = time.time()
         fps = 1 / (cTime - pTime)
         pTime = cTime
@@ -119,6 +125,7 @@ def features_record(tag):
 
 if __name__ == "__main__":
     
-    features_record('mouse')
+    # features_record('mouse')
     # features_record('palm')  # 巴掌
     # features_record('fist')  # 拳头
+    features_record('volume')
