@@ -14,11 +14,12 @@ file_dir = os.path.dirname(absolutepath)
 
 Path = os.path.join(file_dir, 'hand_features.json')
 gestures = []
-with open(Path, encoding='utf-8', mode='r') as f:
-    try:
-        gestures = json.loads(f.read())
-    except:
-        pass
+if os.path.exists(Path):
+    with open(Path, encoding='utf-8', mode='r') as f:
+        try:
+            gestures = json.loads(f.read())
+        except:
+            pass
 gesture_map = {}
 for gesture in gestures:
     gesture_map[gesture['tag']] = gesture
