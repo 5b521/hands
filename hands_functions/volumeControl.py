@@ -56,7 +56,9 @@ class fingerLengthMeter:
     def is_control(self, img):
         self.img = img
         # hand_num decided after find hands
-        self.hand_num = self.detector.hdDict[self.handness][0]
+        # self.hand_num = self.detector.hdDict[self.handness][0]
+        # TODO: fix bug caused by mediapipe
+        self.hand_num = 0
         # htm isn't frame binded, re-calculate feature
         cur_flag = self.flagGenerator([
             self.detector.fingersStraight(self.hand_num),
@@ -72,14 +74,15 @@ class fingerLengthMeter:
         ])
         return (cur_flag ^ tar_flag)&self.filter_flag == 0
     
-    def run_control(self):
+    def run_control(self, draw=True):
         '''
         Please wrap this funciton since it returns additional value
         '''
         dist = self.detector.findDistance(self.measure_lm[0], self.measure_lm[1])
-        d1x, d1y = self.detector.lmList[self.hand_num*21 + self.measure_lm[0]][1:]
-        d2x, d2y = self.detector.lmList[self.hand_num*21 + self.measure_lm[1]][1:]
-        cv2.line(self.img, (d1x, d1y), (d2x, d2y), (0, 255, 255), 3)
+        if draw:
+            d1x, d1y = self.detector.lmList[self.hand_num*21 + self.measure_lm[0]][1:]
+            d2x, d2y = self.detector.lmList[self.hand_num*21 + self.measure_lm[1]][1:]
+            cv2.line(self.img, (d1x, d1y), (d2x, d2y), (0, 255, 255), 3)
         return self.img, dist
 
     @staticmethod
@@ -103,11 +106,13 @@ class systemVolumeControler:
         self.vlc = volumeControler()
 
     def is_volume_control(self, img):
-        return self.meter.is_control(img)
+        # frame binded
+        self.result = self.meter.is_control(img)
+        return self.result
 
     def run_volume_control(self):
-        img, dist = self.meter.run_control()
-        if dist > 1:
+        img, dist = self.meter.run_control(draw=self.result)
+        if dist > 1 and self.result:
             if self.timeRatio and time.time() - self.timeRatio[0] < 0.2:
                     # update time
                     self.timeRatio[0] = time.time()
