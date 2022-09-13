@@ -93,7 +93,7 @@ class HandsMove:
                 else:
                     self.end('垂直波动', False)
             # 水平方向变化较小
-            elif all(tr[2] == self.track[0][2] for tr in self.track):
+            elif all(abs(tr[2] - self.track[0][2]) < 2 for tr in self.track):
                 if all(self.track[i][1] <= self.track[i + 1][1] for i in range(len(self.track) - 1)) \
                         or all(self.track[i][1] >= self.track[i + 1][1] for i in range(len(self.track) - 1)):
                     if abs(self.track[-1][1] - self.track[0][1]) >= 2:

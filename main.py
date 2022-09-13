@@ -60,6 +60,8 @@ def main():
                 lock = lock_func(img)
                 if lock:
                     img = run_func()
+            
+            frame_count = 0
         else:
             if frame_count > 10:
                 lock = False
