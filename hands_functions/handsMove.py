@@ -34,7 +34,7 @@ class HandsMove:
         self.unitChange = 30
         self.distFromOrigin = 0.3
         self.posChange = 0.1
-        self.blockWidth = 0.5
+        self.blockWidth = 0.3
 
         # 原点, 超过一秒钟固定在同一个地方就作为新原点, 以及单位长度
         self.standardUnit = 10

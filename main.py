@@ -20,12 +20,13 @@ def main():
 
     detector = htm.handDetector(maxHands=1)
     mouse_control = mouse.Mouse(wCam, hCam, detector)
-    hands_move_control = handsMove.HandsMove(detector, lambda res: print(res.result), lambda img: detector.fingersStraight()[1] == 1, False)
+    hands_move_control = handsMove.HandsMove(detector, lambda res: print(res.result), lambda img: detector.fingersStraight()[1] == 1, True)
     volume_control = volumeControl.systemVolumeControler(detector)
     lock_func = None
     run_func = None
     lock = False
     frame_count = 0
+    gesture = ''
 
     while True:
 
@@ -72,6 +73,9 @@ def main():
                 lock_func = None
                 run_func = None
                 frame_count = 0
+                if gesture == 'palm':
+                    hands_move_control.handleEnd()
+
             frame_count += 1
 
         cTime = time.time()
