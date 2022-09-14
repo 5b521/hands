@@ -20,7 +20,7 @@ def main():
 
     detector = htm.handDetector(maxHands=1)
     mouse_control = mouse.Mouse(wCam, hCam, detector)
-    hands_move_control = handsMove.HandsMove(detector, lambda res: print('执行了一个功能') if res.result == '水平向右' else None)
+    hands_move_control = handsMove.HandsMove(detector, lambda res: print(res.result), lambda img: detector.fingersStraight()[1] == 1, False)
     volume_control = volumeControl.systemVolumeControler(detector)
     lock_func = None
     run_func = None
@@ -60,7 +60,10 @@ def main():
                 lock = lock_func(img)
                 if lock:
                     img = run_func()
-            
+                else:
+                    lock_func = None
+                    run_func = None
+                    start_func = None
             frame_count = 0
         else:
             if frame_count > 10:

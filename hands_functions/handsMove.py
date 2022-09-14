@@ -4,7 +4,7 @@ import cv2
 
 class HandsMove:
 
-    def __init__(self, detector, onEnd=None):
+    def __init__(self, detector, onEnd=None, isLockFunc=None, usingOldLockFunc=False):
         '''
         当手势识别结束时, 触发 onEnd 函数, 并传入一个 HandsMove 对象,
         
@@ -18,10 +18,14 @@ class HandsMove:
                 print(handsMove.result)
         
         你还可以使用 HandsMove 对象的 track 属性获取手势的轨迹等.
+
+        还可以输入一个自定义的 isLockFunc 函数
         '''
 
         # 回调函数
         self.onEnd = onEnd
+        self.isLockFunc = isLockFunc
+        self.usingOldLockFunc = usingOldLockFunc
         self.result = None
         self.useful = False
 
@@ -63,19 +67,19 @@ class HandsMove:
         self.lastPos = self.originPos
 
     def end(self, result, useful=True):
+        self.track.clear()
         self.result = result
         self.useful = useful
-        if callable(self.onEnd):
+        if self.lock and callable(self.onEnd):
             self.onEnd(self)
         self.lock = False
 
-    def handleOriginChange(self):
+    def handleEnd(self):
         '''
         当原点发生变化时, 触发的函数, 进行一系列处理
         '''
         if len(self.track) == 0 or len(self.track) == 1:
-            self.track.clear()
-            return
+            return self.end('原地不动', False)
         # z 轴变化较小
         if max(tr[3] for tr in self.track) - min(tr[3] for tr in self.track) < 2:
             # 垂直方向变化较小
@@ -86,23 +90,23 @@ class HandsMove:
                     # 超过一定的长度
                     if abs(self.track[-1][2] - self.track[0][2]) >= 2:
                         if self.track[-1][2] > self.track[0][2]:
-                            self.end('垂直向下')
+                            return self.end('垂直向下')
                         else:
-                            self.end('垂直向上')
+                            return self.end('垂直向上')
                 # 不单调递减或单调递增, 则为波动
                 else:
-                    self.end('垂直波动', False)
+                    return self.end('垂直波动', False)
             # 水平方向变化较小
             elif all(abs(tr[2] - self.track[0][2]) < 2 for tr in self.track):
                 if all(self.track[i][1] <= self.track[i + 1][1] for i in range(len(self.track) - 1)) \
                         or all(self.track[i][1] >= self.track[i + 1][1] for i in range(len(self.track) - 1)):
                     if abs(self.track[-1][1] - self.track[0][1]) >= 2:
                         if self.track[-1][1] > self.track[0][1]:
-                            self.end('水平向左')
+                            return self.end('水平向左')
                         else:
-                            self.end('水平向右')
+                            return self.end('水平向右')
                 else:
-                    self.end('水平波动', False)
+                    return self.end('水平波动', False)
             # 倾斜(左/右)(上/下)
             else:
                 if (all(self.track[i][1] <= self.track[i + 1][1] for i in range(len(self.track) - 1)) \
@@ -112,25 +116,24 @@ class HandsMove:
                     if abs(self.track[-1][1] - self.track[0][1]) >= 3 and abs(self.track[-1][2] - self.track[0][2]) >= 3:
                         if self.track[-1][2] > self.track[0][2]:
                             if self.track[-1][1] > self.track[0][1]:
-                                self.end('倾斜左下')
+                                return self.end('倾斜左下')
                             else:
-                                self.end('倾斜右下')
+                                return self.end('倾斜右下')
                         else:
                             if self.track[-1][1] > self.track[0][1]:
-                                self.end('倾斜左上')
+                                return self.end('倾斜左上')
                             else:
-                                self.end('倾斜右上')
+                                return self.end('倾斜右上')
         else:
             def getZStr():
                 return '出拳' if self.track[-1][3] > self.track[0][3] else '收拳'
             if abs(self.track[-1][1] - self.track[0][1]) >= 3:
-                self.end('水平' + getZStr())
+                return self.end('水平' + getZStr())
             elif abs(self.track[-1][2] - self.track[0][2]) >= 3:
-                self.end('垂直' + getZStr())
+                return self.end('垂直' + getZStr())
             else:
-                self.end(getZStr())
-        self.track.clear()
-        self.end('未识别到手势', False)
+                return self.end(getZStr())
+        return self.end('未识别到手势', False)
 
     def isLock(self, img):
         self.img = img
@@ -163,11 +166,15 @@ class HandsMove:
                 # 单位发生较大变化, 更新单位长度
                 if abs(self.unit - self.standardUnit) > self.unitChange:
                     self.standardUnit = self.lastUnit
-                # 坐标相对原点发生变化, 但相对上一秒坐标没有发生较大变化, 则更新坐标, 表明结束
-                if (abs(wristPos[1] - self.originPos[0]) / self.unit > self.distFromOrigin or abs(wristPos[2] - self.originPos[1]) / self.unit > self.distFromOrigin) \
-                        and abs(wristPos[1] - self.lastPos[0]) / self.unit < self.posChange and abs(wristPos[2] - self.lastPos[1]) / self.unit < self.posChange:
-                    self.handleOriginChange()
-                    self.originPos = self.lastPos
+                if self.isLockFunc:
+                    if self.isLockFunc(self.img) == False:
+                        self.handleEnd()
+                if not self.isLockFunc or self.usingOldLockFunc:
+                    # 坐标相对原点发生变化, 但相对上一秒坐标没有发生较大变化, 则更新坐标, 表明结束
+                    if (abs(wristPos[1] - self.originPos[0]) / self.unit > self.distFromOrigin or abs(wristPos[2] - self.originPos[1]) / self.unit > self.distFromOrigin) \
+                            and abs(wristPos[1] - self.lastPos[0]) / self.unit < self.posChange and abs(wristPos[2] - self.lastPos[1]) / self.unit < self.posChange:
+                        self.handleEnd()
+                        self.originPos = self.lastPos
                 # 更新上一秒的信息
                 self.lastTime = self.cTime
                 self.lastUnit = self.unit
