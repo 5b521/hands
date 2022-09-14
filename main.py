@@ -13,7 +13,7 @@ from features_record import hand_recognition as hr
 def main():
 
     pTime = 0
-    cap = cv2.VideoCapture(0)  # 若使用笔记本自带摄像头则编号为0  若使用外接摄像头 则更改为1或其他编号
+    cap = cv2.VideoCapture(0)  # 若使用笔记5本自带摄像头则编号为0  若使用外接摄像头 则更改为1或其他编号
 
     wCam = int(cap.get(3))
     hCam = int(cap.get(4))
