@@ -99,11 +99,12 @@ class fingerLengthMeter:
         return flag
 
 class systemVolumeControler:
-    min_ratio = 12.5
+    min_ratio = 40
     def __init__(self, detector: htm) -> None:
         self.meter = fingerLengthMeter(detector, "volume", 0x4060, (4, 8))
         self.timeRatio = [0, self.min_ratio]
         self.vlc = volumeControler()
+        self.d = detector
 
     def is_volume_control(self, img):
         # frame binded

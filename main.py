@@ -8,6 +8,7 @@ from hands_functions import AiVirtualMouse as mouse
 from hands_functions import handsMove
 from hands_functions import volumeControl
 from features_record import hand_recognition as hr
+from hands_functions import page
 
 
 def main():
@@ -20,7 +21,7 @@ def main():
 
     detector = htm.handDetector(maxHands=1)
     mouse_control = mouse.Mouse(wCam, hCam, detector)
-    hands_move_control = handsMove.HandsMove(detector, lambda res: print(res.result), lambda img: detector.fingersStraight()[1] == 1, True)
+    hands_move_control = handsMove.HandsMove(detector, page.page_move, lambda img: detector.fingersStraight()[1] == 1, True)
     volume_control = volumeControl.systemVolumeControler(detector)
     lock_func = None
     run_func = None
