@@ -2,3 +2,4 @@ autopy
 cvzone
 mediapipe
 keyboard
+pycaw
