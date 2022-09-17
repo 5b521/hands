@@ -104,6 +104,7 @@ class systemVolumeControler:
         self.meter = fingerLengthMeter(detector, "volume", 0x4060, (4, 8))
         self.timeRatio = [0, self.min_ratio]
         self.vlc = volumeControler()
+        self.d = detector
 
     def is_volume_control(self, img):
         # frame binded
@@ -112,19 +113,29 @@ class systemVolumeControler:
 
     def run_volume_control(self):
         img, dist = self.meter.run_control(draw=self.result)
+        # if dist > 1 and self.result:
+        #     if self.timeRatio and time.time() - self.timeRatio[0] < 0.2:
+        #             # update time
+        #             self.timeRatio[0] = time.time()
+        #             new_perc = self.timeRatio[1]*(int(dist)-1)
+        #             if new_perc > 100:
+        #                 new_perc = 100
+        #                 self.timeRatio[1] = 100/(dist - 1)
+        #             if abs(self.vlc.getCurrentVolume() - new_perc) >= 1:
+        #                 self.vlc.setVolume(new_perc)
+        #     else:
+        #         new_ratio = self.vlc.getCurrentVolume()/(dist - 1)
+        #         self.timeRatio = [time.time(), new_ratio if new_ratio >= self.min_ratio else self.timeRatio[1]]
         if dist > 1 and self.result:
-            if self.timeRatio and time.time() - self.timeRatio[0] < 0.2:
-                    # update time
-                    self.timeRatio[0] = time.time()
-                    new_perc = self.timeRatio[1]*(int(dist)-1)
-                    if new_perc > 100:
-                        new_perc = 100
-                        self.timeRatio[1] = 100/(dist - 1)
-                    if abs(self.vlc.getCurrentVolume() - new_perc) >= 1:
-                        self.vlc.setVolume(new_perc)
-            else:
-                new_ratio = self.vlc.getCurrentVolume()/(dist - 1)
-                self.timeRatio = [time.time(), new_ratio if new_ratio >= self.min_ratio else self.timeRatio[1]]
+            new_perc = self.timeRatio[1]*(int(dist)-1)
+            new_perc += 4
+            if new_perc > 100:
+                new_perc = 100
+                self.timeRatio[1] = 100/(dist - 1)
+            if abs(self.vlc.getCurrentVolume() - new_perc) >= 1:
+                self.vlc.setVolume(new_perc)
+            new_ratio = self.vlc.getCurrentVolume()/(dist - 1)
+            self.timeRatio = [time.time(), new_ratio if new_ratio >= self.min_ratio else self.timeRatio[1]]
         return img
 
 if __name__ == "__main__":

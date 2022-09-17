@@ -10,10 +10,10 @@ import keyboard as key
 import sys
 sys.path.append('..')
 
-absolutepath = os.path.abspath(__file__)
-file_dir = os.path.dirname(absolutepath)
+# absolutepath = os.path.abspath(__file__)
+# file_dir = os.path.dirname(absolutepath)
 
-Path = os.path.join(file_dir, 'hand_features.json')
+# Path = os.path.join(file_dir, 'hand_features.json')
 # a = {'b':'c' , 'k':'p'}
 # b = {'b':'c' , 'k':'p'}
 
@@ -35,4 +35,5 @@ Path = os.path.join(file_dir, 'hand_features.json')
 # print(dict)
 
 
-print(sys.path)
+# print(sys.path)
+

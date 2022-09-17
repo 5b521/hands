@@ -8,24 +8,26 @@ from hands_functions import AiVirtualMouse as mouse
 from hands_functions import handsMove
 from hands_functions import volumeControl
 from features_record import hand_recognition as hr
+from hands_functions import page
 
 
 def main():
 
     pTime = 0
-    cap = cv2.VideoCapture(0)  # 若使用笔记本自带摄像头则编号为0  若使用外接摄像头 则更改为1或其他编号
+    cap = cv2.VideoCapture(0)  # 若使用笔记5本自带摄像头则编号为0  若使用外接摄像头 则更改为1或其他编号
 
     wCam = int(cap.get(3))
     hCam = int(cap.get(4))
 
     detector = htm.handDetector(maxHands=1)
     mouse_control = mouse.Mouse(wCam, hCam, detector)
-    hands_move_control = handsMove.HandsMove(detector, lambda res: print(res.result), lambda img: detector.fingersStraight()[1] == 1, False)
+    hands_move_control = handsMove.HandsMove(detector, page.page_move, lambda img: detector.fingersStraight()[1] == 1, True)
     volume_control = volumeControl.systemVolumeControler(detector)
     lock_func = None
     run_func = None
     lock = False
     frame_count = 0
+    gesture = ''
 
     while True:
 
@@ -72,6 +74,9 @@ def main():
                 lock_func = None
                 run_func = None
                 frame_count = 0
+                if gesture == 'palm':
+                    hands_move_control.handleEnd()
+
             frame_count += 1
 
         cTime = time.time()

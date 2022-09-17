@@ -85,8 +85,8 @@ class HandsMove:
             # 垂直方向变化较小
             if all(abs(tr[1] - self.track[0][1]) < 3 for tr in self.track):
                 # 单调递减或单调递增
-                if all(self.track[i][2] <= self.track[i + 1][2] for i in range(len(self.track) - 1)) \
-                        or all(self.track[i][2] >= self.track[i + 1][2] for i in range(len(self.track) - 1)):
+                if all(self.track[i][2] <= self.track[i + 1][2] + 1 for i in range(len(self.track) - 1)) \
+                        or all(self.track[i][2] >= self.track[i + 1][2] - 1 for i in range(len(self.track) - 1)):
                     # 超过一定的长度
                     if abs(self.track[-1][2] - self.track[0][2]) >= 2:
                         if self.track[-1][2] > self.track[0][2]:
@@ -98,8 +98,8 @@ class HandsMove:
                     return self.end('垂直波动', False)
             # 水平方向变化较小
             elif all(abs(tr[2] - self.track[0][2]) < 2 for tr in self.track):
-                if all(self.track[i][1] <= self.track[i + 1][1] for i in range(len(self.track) - 1)) \
-                        or all(self.track[i][1] >= self.track[i + 1][1] for i in range(len(self.track) - 1)):
+                if all(self.track[i][1] <= self.track[i + 1][1] + 1 for i in range(len(self.track) - 1)) \
+                        or all(self.track[i][1] >= self.track[i + 1][1] - 1 for i in range(len(self.track) - 1)):
                     if abs(self.track[-1][1] - self.track[0][1]) >= 2:
                         if self.track[-1][1] > self.track[0][1]:
                             return self.end('水平向左')
