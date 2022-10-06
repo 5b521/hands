@@ -59,7 +59,6 @@ target/
 
 # IDE/Editor configuration
 .idea/
-.vscode/
 .env
 
 # Filesystem file
