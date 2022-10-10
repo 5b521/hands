@@ -37,7 +37,23 @@ class volumeControler:
             print("Set Volume to {}% virtually".format(int(scalarVolume)))
 
 class fingerLengthMeter:
-    def __init__(self, detector: htm, gesture_tag, ignore_flag: int, measure_lm: tuple):
+    '''
+    计算两个指尖之间的距离
+    gesture_tag: 绑定的手势
+    ignore_flag: 跟踪手势中手指的距离变化时忽略某些 feature 的变化
+    
+    函数将按
+    fingersStraight 5
+    fingersUp 5
+    close_together 4
+    thumb_close 4
+    的顺序构建 flag 用于比对手势, ignore_flag 中的为 1 的位可以让函数在比对时忽略特定 feature 的变化
+    
+    可以使用 fingerLengthMeter.flagGenerator([[0, 0, 0, 0, 0], ..., [0, 0, 0, 0]]) 来生成填入
+    
+    measure_lm: 跟踪的两个手指 landmark
+    '''
+    def __init__(self, detector: htm.handDetector, gesture_tag: str, ignore_flag: int, measure_lm: tuple):
         self.detector = detector
         
         # access loaded gestures
@@ -59,7 +75,7 @@ class fingerLengthMeter:
         # self.hand_num = self.detector.hdDict[self.handness][0]
         # TODO: fix bug caused by mediapipe
         self.hand_num = 0
-        # htm isn't frame binded, re-calculate feature
+        # detector won't auto calculate feature
         cur_flag = self.flagGenerator([
             self.detector.fingersStraight(self.hand_num),
             self.detector.fingersUp(self.hand_num),
@@ -100,7 +116,7 @@ class fingerLengthMeter:
 
 class systemVolumeControler:
     min_ratio = 12.5
-    def __init__(self, detector: htm) -> None:
+    def __init__(self, detector: htm.handDetector) -> None:
         self.meter = fingerLengthMeter(detector, "volume", 0x4060, (4, 8))
         self.timeRatio = [0, self.min_ratio]
         self.vlc = volumeControler()
