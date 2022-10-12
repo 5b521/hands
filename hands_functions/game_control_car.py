@@ -15,9 +15,13 @@ class car_controller:
         self.forward_back = True
         self.detector = Detector
         self.kc = KeyController()
-        # 注册 lr (left right) fb (forward back) 为冲突按键
-        self.kc.register_conflicting_keys('lr', ['a', 'd'])
-        self.kc.register_conflicting_keys('fb', ['w', 's'])
+        # 注册新键和注册 lr (left right) fb (forward back) 为冲突按键
+        self.kc.register_keymap('l', 'a')
+        self.kc.register_keymap('r', 'd')
+        self.kc.register_keymap('f', 'w')
+        self.kc.register_keymap('b', 's')
+        self.kc.register_conflicting_keys('lr', ['l', 'r'])
+        self.kc.register_conflicting_keys('fb', ['f', 'b'])
         
     def press_key(self, key, t):
 
@@ -45,9 +49,9 @@ class car_controller:
             vector = self.detector.findEvelation('Left', 6, 'Right', 6, self.img, True)
             if vector:
                 if vector > 0:
-                    left_right = 'a'
+                    left_right = 'l'
                 else:
-                    left_right = 'd'
+                    left_right = 'r'
                 
                 angle = abs(vector)
 
@@ -61,12 +65,12 @@ class car_controller:
 
             if Right_Fup[0] and not Left_Fup[0]:
                 # 前进
-                if not self.kc.is_keydown('w'):
-                    self.kc.keydown('w')
+                if not self.kc.is_keydown('f'):
+                    self.kc.keydown('f')
             elif not Right_Fup[0] and Left_Fup[0]:
                 # 后退
-                if not self.kc.is_keydown('s'):
-                    self.kc.keydown('s')
+                if not self.kc.is_keydown('b'):
+                    self.kc.keydown('b')
             else:
                 # 既不前进也不后退
                 self.kc.release_conflicting_keys('fb')

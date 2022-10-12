@@ -146,6 +146,22 @@ class KeyController:
     def __init__(self) -> None:
         self.conflicting_keys_map = {}
         self.pressed_keys = set()
+        self.new_keycode_map = {}
+
+    def register_keymap(self, new_key, old_key):
+        '''
+        注册新按键
+        '''
+        self.new_keycode_map[new_key] = keycode_map[old_key]
+
+    def keymap(self, key):
+        '''
+        按键映射
+        '''
+        if key in self.new_keycode_map:
+            return self.new_keycode_map[key]
+        else:
+            return keycode_map[key]
 
     # conflicting_keys
     def register_conflicting_keys(self, name, conflicting_keys):
@@ -205,7 +221,7 @@ class KeyController:
         '''
         extra = ctypes.c_ulong(0)
         ii_ = Input_I()
-        hexKeyCode = keycode_map[key]
+        hexKeyCode = self.keymap(key)
         ii_.ki = KeyBdInput( 0, hexKeyCode, 0x0008, 0, ctypes.pointer(extra))
         x = Input( ctypes.c_ulong(1), ii_)
         SendInput(1, ctypes.pointer(x), ctypes.sizeof(x))
@@ -225,7 +241,7 @@ class KeyController:
         '''
         extra = ctypes.c_ulong(0)
         ii_ = Input_I()
-        hexKeyCode = keycode_map[key]
+        hexKeyCode = self.keymap(key)
         ii_.ki = KeyBdInput(0, hexKeyCode, 0x0008 | 0x0002, 0, ctypes.pointer(extra))
         x = Input(ctypes.c_ulong(1), ii_)
         SendInput(1, ctypes.pointer(x), ctypes.sizeof(x))
