@@ -72,9 +72,11 @@ def hand_recognition(detector, diff=10):
                             and hands[right_left]['TClose'] == gesture[right_left]['TClose']\
                             and detector.direction_same(gesture[right_left]["FDirection"], hands[right_left]["FDirection"], diff):
                         return gesture['tag']
-            else:
-                # 包含了 "Left", "Right" 和 "tag", 所以 len(gesture) == 3
-                if len(gesture) == 3:
+                
+    else:
+        # 包含了 "Left", "Right" 和 "tag", 所以 len(gesture) == 3
+        for gesture in gestures:
+            if len(gesture) == 3:
                     right_left = list(hands.keys())[0]
                     if gesture.get(right_left):
                         if hands[right_left]['FStraight'] == gesture[right_left]['FStraight']\

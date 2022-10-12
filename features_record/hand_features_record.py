@@ -59,7 +59,7 @@ def features_record(tag):
     pTime = 0
     cTime = 0
     cap = cv2.VideoCapture(0)
-    detector = htm.handDetector()
+    detector = htm.handDetector(maxHands=2)
 
     count = 0
 
@@ -125,6 +125,7 @@ def features_record(tag):
 
 if __name__ == "__main__":
     
-    features_record('mouse')  # 鼠标
+    # features_record('mouse')  # 鼠标
     # features_record('palm')  # 巴掌
     # features_record('volume')  # 音量
+    features_record('car') #体感游戏

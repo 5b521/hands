@@ -9,9 +9,10 @@ from hands_functions import handsMove
 from hands_functions import volumeControl
 from features_record import hand_recognition as hr
 from hands_functions import page
+from hands_functions import game_control_car
 
 
-def main():
+def main(mode = 'office'):
 
     pTime = 0
     cap = cv2.VideoCapture(0)  # 若使用笔记5本自带摄像头则编号为0  若使用外接摄像头 则更改为1或其他编号
@@ -19,10 +20,14 @@ def main():
     wCam = int(cap.get(3))
     hCam = int(cap.get(4))
 
-    detector = htm.handDetector(maxHands=1)
+    if mode == 'office':
+        detector = htm.handDetector(maxHands=1)
+    elif mode == 'game':
+        detector = htm.handDetector(maxHands=2)
     mouse_control = mouse.Mouse(wCam, hCam, detector)
     hands_move_control = handsMove.HandsMove(detector, page.page_move, lambda img: detector.fingersStraight()[1] == 1, True)
     volume_control = volumeControl.systemVolumeControler(detector)
+    car_controller = game_control_car.car_controller(detector)
     lock_func = None
     run_func = None
     lock = False
@@ -52,6 +57,9 @@ def main():
                 elif (gesture == 'volume'):
                     lock_func = volume_control.is_volume_control
                     run_func = volume_control.run_volume_control
+                elif gesture == 'car':
+                    lock_func = car_controller.is_car_controller
+                    run_func = car_controller.car_control
                 if lock_func and run_func:
                     if start_func:
                         start_func(img)
@@ -89,4 +97,5 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    main('game')
+    # main('office')
