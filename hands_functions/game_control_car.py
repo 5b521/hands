@@ -5,105 +5,29 @@ import time
 import numpy as np
 import HandTrackingModule as htm
 import cv2
-import pydirectinput
-
-import ctypes
-
-SendInput = ctypes.windll.user32.SendInput
-
-# C struct redefinitions 
-PUL = ctypes.POINTER(ctypes.c_ulong)
-class KeyBdInput(ctypes.Structure):
-    _fields_ = [("wVk", ctypes.c_ushort),
-                ("wScan", ctypes.c_ushort),
-                ("dwFlags", ctypes.c_ulong),
-                ("time", ctypes.c_ulong),
-                ("dwExtraInfo", PUL)]
-
-class HardwareInput(ctypes.Structure):
-    _fields_ = [("uMsg", ctypes.c_ulong),
-                ("wParamL", ctypes.c_short),
-                ("wParamH", ctypes.c_ushort)]
-
-class MouseInput(ctypes.Structure):
-    _fields_ = [("dx", ctypes.c_long),
-                ("dy", ctypes.c_long),
-                ("mouseData", ctypes.c_ulong),
-                ("dwFlags", ctypes.c_ulong),
-                ("time",ctypes.c_ulong),
-                ("dwExtraInfo", PUL)]
-
-class Input_I(ctypes.Union):
-    _fields_ = [("ki", KeyBdInput),
-                 ("mi", MouseInput),
-                 ("hi", HardwareInput)]
-
-class Input(ctypes.Structure):
-    _fields_ = [("type", ctypes.c_ulong),
-                ("ii", Input_I)]
-
-# Actuals Functions
-
-def PressKey(hexKeyCode):
-    extra = ctypes.c_ulong(0)
-    ii_ = Input_I()
-    ii_.ki = KeyBdInput( 0, hexKeyCode, 0x0008, 0, ctypes.pointer(extra) )
-    x = Input( ctypes.c_ulong(1), ii_ )
-    ctypes.windll.user32.SendInput(1, ctypes.pointer(x), ctypes.sizeof(x))
-
-def ReleaseKey(hexKeyCode):
-    extra = ctypes.c_ulong(0)
-    ii_ = Input_I()
-    ii_.ki = KeyBdInput( 0, hexKeyCode, 0x0008 | 0x0002, 0, ctypes.pointer(extra) )
-    x = Input( ctypes.c_ulong(1), ii_ )
-    ctypes.windll.user32.SendInput(1, ctypes.pointer(x), ctypes.sizeof(x))
-
+from utils.key_controller import KeyController
 
 class car_controller:
     def __init__(self, Detector):
-        # self.Last_left_right = 'a'
-        self.Last_left_right = NULL
         self.Last_time = time.time()
         self.Pressed = False
         self.ws_Pressed = False
         self.forward_back = True
         self.detector = Detector
-    
-    def press_key(self,key,t):
-        # if self.Last_left_right != key:
-        #     pydirectinput.keyUp(self.Last_left_right)
-        if t == 0:
-            if self.Pressed:
-                ReleaseKey(self.Last_left_right)
-                self.Pressed = False
+        self.kc = KeyController()
+        # 注册 lr (left right) fb (forward back) 为冲突按键
+        self.kc.register_conflicting_keys('lr', ['a', 'd'])
+        self.kc.register_conflicting_keys('fb', ['w', 's'])
+        
+    def press_key(self, key, t):
 
-            return 
-
-        if self.Last_left_right != key :
-            if self.Pressed:
-                ReleaseKey(self.Last_left_right)
-                PressKey(key)
-                self.Last_time = time.time()
-                self.Last_left_right = key
-            else:
-                self.Pressed = True
-                PressKey(key)
-                self.Last_time = time.time()
-                self.Last_left_right = key
-
-        elif not self.Pressed :
-            # pydirectinput.keyUp(self.Last_left_right)
-            # ReleaseKey(self.Last_left_right)
-            self.Last_left_right = key
-            # pydirectinput.keyDown(key)
-            PressKey(key)
-
+        if not self.kc.is_keydown(key):
+            self.kc.keydown(key)
             self.Last_time = time.time()
-            self.Pressed = True
-        elif time.time() - self.Last_time > t :
-            # pydirectinput.keyUp(key)
-            ReleaseKey(key)
-            self.Pressed = False    
+
+        elif time.time() - self.Last_time > t:
+            # print(t)
+            self.kc.keyup(key)
     
     def is_car_controller(self,img):
         self.img = img
@@ -121,48 +45,31 @@ class car_controller:
             vector = self.detector.findEvelation('Left', 6, 'Right', 6, self.img, True)
             if vector:
                 if vector > 0:
-                    left_right = 0x1E
+                    left_right = 'a'
                 else:
-                    left_right = 0x20
+                    left_right = 'd'
                 
                 angle = abs(vector)
 
                 if angle < 5:
-                    self.press_key(left_right,0)
+                    self.kc.release_conflicting_keys('lr')
                 else:
-                    self.press_key(left_right,angle/360)
+                    self.press_key(left_right, angle/360)
             
             Left_Fup = self.detector.fingersUp(self.detector.hdDict['Left'])
             Right_Fup = self.detector.fingersUp(self.detector.hdDict['Right'])
 
             if Right_Fup[0] and not Left_Fup[0]:
-                if not self.ws_Pressed:
-                    self.ws_Pressed = True
-                    self.forward_back = True
-                    PressKey(0x11)
-                else:
-                    if not self.forward_back:
-                        ReleaseKey(0x1f)
-                        self.forward_back = True
-                        PressKey(0x11)
+                # 前进
+                if not self.kc.is_keydown('w'):
+                    self.kc.keydown('w')
             elif not Right_Fup[0] and Left_Fup[0]:
-                if not self.ws_Pressed:
-                    self.ws_Pressed = True
-                    self.forward_back = False
-                    PressKey(0x1f)
-                else:
-                    if self.forward_back:
-                        ReleaseKey(0x11)
-                        self.forward_back = False
-                        PressKey(0x1f)
+                # 后退
+                if not self.kc.is_keydown('s'):
+                    self.kc.keydown('s')
             else:
-                if self.ws_Pressed:
-                    if self.forward_back:
-                        ReleaseKey(0x11)
-                        self.ws_Pressed = False
-                    else:
-                        self.ws_Pressed =False
-                        ReleaseKey(0x1f)
+                # 既不前进也不后退
+                self.kc.release_conflicting_keys('fb')
             # print('left:',Left_Fup[0],"right",Right_Fup[0])
         return self.img
 
