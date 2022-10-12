@@ -116,10 +116,21 @@ class handDetector():
 
         return FStraight
 
+    def dot_to_line(self,dot1,dot2,hand_num = 0):
+        d1 = self.results.multi_hand_world_landmarks[hand_num].landmark[dot1]
+        d2 = self.results.multi_hand_world_landmarks[hand_num].landmark[dot2]
+
+        return [d2.x - d1.x, d2.y - d1.y, d2.z-d1.z]
     def fingersUp(self, hand_num=0):
         self.FUp = []
         # 大拇指
-        if self.is_straight(2, 3, 2, 1, 160, hand_num):
+
+        v1 = np.array(self.dot_to_line(9,5,hand_num))
+        v2 = np.array(self.dot_to_line(2,4,hand_num))
+
+        v1 = v1 / np.linalg.norm(v1)
+
+        if np.dot(v1,v2) > np.linalg.norm(v2)/4:
             self.FUp.append(1)
         else:
             self.FUp.append(0)
@@ -310,9 +321,9 @@ def main():
 
         if len(lmList) != 0:
         # Elevation test
-            if detector.hdDict["Detected"] == 2:
-                print(detector.findEvelation('Left', 6, 'Right', 6, img, 
-                                    True))
+            # if detector.hdDict["Detected"] == 2:
+            #     print(detector.findEvelation('Left', 6, 'Right', 6, img, 
+            #                         True))
             # print(detector.direction('Left'))
             # direction = [[5.375117808580399, -9.055236307904124, -1.5031843446195126], [-0.8503671735525131, -7.541118375957012, -4.165707714855671]]
             # if(detector.direction_same(direction,detector.direction('Left'),10)):
@@ -324,11 +335,11 @@ def main():
             # FClose = detector.close_together()
             # print(FClose[0])
             # FUp = detector.fingersUp()
-            # FStraight = detector.fingersUp()
-            # for i in range(0, 5):
-            #     if (FStraight[i] == 1):
-            #         cv2.circle(
-            #             img, (lmList[(i+1)*4][1], lmList[(i+1)*4][2]), 15, (0, 0, 255), cv2.FILLED)
+            FStraight = detector.fingersUp()
+            for i in range(0, 5):
+                if (FStraight[i] == 1):
+                    cv2.circle(
+                        img, (lmList[(i+1)*4][1], lmList[(i+1)*4][2]), 15, (0, 0, 255), cv2.FILLED)
             # if(FStraight[0] == 1):
             #     print("good")
             # else:
