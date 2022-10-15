@@ -10,6 +10,7 @@ from hands_functions import volumeControl
 from features_record import hand_recognition as hr
 from hands_functions import page
 from hands_functions import game_control_car
+from hands_functions import exe_file_launch
 
 
 def main(mode = 'office'):
@@ -28,6 +29,7 @@ def main(mode = 'office'):
     hands_move_control = handsMove.HandsMove(detector, page.page_move, lambda img: detector.fingersStraight()[1] == 1, True)
     volume_control = volumeControl.systemVolumeControler(detector)
     car_controller = game_control_car.car_controller(detector)
+    exe_file_launcher = exe_file_launch.run_exe_file(r'D:\tencent\Bin\QQScLauncher.exe')
     lock_func = None
     run_func = None
     lock = False
@@ -60,6 +62,9 @@ def main(mode = 'office'):
                 elif gesture == 'car':
                     lock_func = car_controller.is_car_controller
                     run_func = car_controller.car_control
+                elif gesture == 'QQ':
+                    lock_func = exe_file_launcher.lock_func
+                    run_func = exe_file_launcher.Execute
                 if lock_func and run_func:
                     if start_func:
                         start_func(img)

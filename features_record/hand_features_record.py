@@ -128,4 +128,5 @@ if __name__ == "__main__":
     # features_record('mouse')  # 鼠标
     # features_record('palm')  # 巴掌
     # features_record('volume')  # 音量
-    features_record('car') #体感游戏
+    # features_record('car') #体感游戏
+    features_record('QQ') #打开QQ
