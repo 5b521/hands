@@ -29,7 +29,7 @@ def main(mode = 'office'):
     hands_move_control = handsMove.HandsMove(detector, page.page_move, lambda img: detector.fingersStraight()[1] == 1, True)
     volume_control = volumeControl.systemVolumeControler(detector)
     car_controller = game_control_car.car_controller(detector)
-    exe_file_launcher = exe_file_launch.run_exe_file(r'D:\tencent\Bin\QQScLauncher.exe')
+    QQ_exe_file_launcher = exe_file_launch.run_exe_file(r'D:\tencent\Bin\QQScLauncher.exe',detector)
     lock_func = None
     run_func = None
     lock = False
@@ -63,8 +63,8 @@ def main(mode = 'office'):
                     lock_func = car_controller.is_car_controller
                     run_func = car_controller.car_control
                 elif gesture == 'QQ':
-                    lock_func = exe_file_launcher.lock_func
-                    run_func = exe_file_launcher.Execute
+                    lock_func = QQ_exe_file_launcher.lock_func
+                    run_func = QQ_exe_file_launcher.Execute
                 if lock_func and run_func:
                     if start_func:
                         start_func(img)
@@ -89,7 +89,8 @@ def main(mode = 'office'):
                 frame_count = 0
                 if gesture == 'palm':
                     hands_move_control.handleEnd()
-
+                elif gesture == 'QQ':
+                    QQ_exe_file_launcher.handleEnd()
             frame_count += 1
 
         cTime = time.time()

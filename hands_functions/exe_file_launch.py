@@ -2,22 +2,31 @@ import os
 from features_record import hand_recognition
 class run_exe_file():
 
-    def __init__(self,path) :
+    def __init__(self,path,detector) :
         self.Executed = False
         self.path = path
+        self.detector = detector
+        self.FUp = None
 
     def lock_func(self,img):
         self.img = img
-        
-        
-        if self.Executed == True:
-            self.count = 0
+        if not self.FUp:
+            self.FUp = self.detector.FUp
+        if self.FUp != self.detector.FUp:
             self.Executed = False
-            return self.Executed
-        return not self.Executed
+            return False
+        else:
+            return True
+        
     
     def Execute(self):
         # path =  repr(self.str)
-        os.startfile(self.path)
-        self.Executed = True
+        if not self.Executed:
+            print('execute')
+            os.startfile(self.path)
+            self.Executed = True
         return self.img
+
+    def handleEnd(self):
+        self.Executed = False
+        
