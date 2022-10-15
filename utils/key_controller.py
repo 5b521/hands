@@ -1,4 +1,5 @@
 import ctypes
+import time
 
 SendInput = ctypes.windll.user32.SendInput
 
@@ -250,19 +251,32 @@ class KeyController:
         if key in self.pressed_keys:
             self.pressed_keys.remove(key)
 
+
+    def key_click(self, key, delay=0.0):
+        '''
+        点击按键
+        '''
+        if isinstance(key, list):
+            if delay == 0.0:
+                for k in key:
+                    self.keydown(k)
+                for k in reversed(key):
+                    self.keyup(k)
+            else:
+                for k in key:
+                    self.keydown(k)
+                    time.sleep(delay)
+                for k in reversed(key):
+                    self.keyup(k)
+                    time.sleep(delay)
+        else:            
+            self.keydown(key)
+            self.keyup(key)
+    
+
     def is_keydown(self, key):
         '''
         判断按键是否按下
         '''
         return key in self.pressed_keys
-
-
-    def key_click(self, key):
-        '''
-        单击按键
-        '''
-        self.keydown(key)
-        self.keyup(key)
-
-        
     

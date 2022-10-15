@@ -1,7 +1,8 @@
 import os
 import webbrowser
 import cv2
-
+import autopy
+from utils.key_controller import KeyController
 
 class launcher:
 
@@ -24,7 +25,7 @@ class launcher:
     def onRun(self):
         # path =  repr(self.str)
         if not self.is_executed:
-            # print('execute')
+            print('execute')
             self.execute_func()
             self.is_executed = True
         else:
@@ -38,10 +39,14 @@ class launcher:
         
 
 
-def exe_file_launcher(path, detector):
+def exe_file_launcher(detector, path):
     return launcher(detector, lambda: os.startfile(path))
 
 
-def webbrowser_launcher(url, detector):
+def webbrowser_launcher(detector, url):
     return launcher(detector, lambda: webbrowser.open(url))
-        
+
+
+def key_launcher(detector, key):
+    kc = KeyController()
+    return launcher(detector, lambda: kc.key_click(key))

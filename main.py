@@ -1,5 +1,6 @@
 import cv2
 import HandTrackingModule as htm
+import autopy
 import time
 from hands_functions import AiVirtualMouse as mouse
 from hands_functions import handsMove
@@ -27,8 +28,10 @@ def main(mode = 'office'):
         'palm': handsMove.HandsMove(detector, page.page_move, lambda img: detector.fingersStraight()[1] == 1, True),
         'volume': volumeControl.systemVolumeControler(detector),
         'car': game_control_car.car_controller(detector),
-        'QQ': launcher.exe_file_launcher(r'D:\tencent\Bin\QQScLauncher.exe', detector),
-        'web': launcher.webbrowser_launcher(r'https://cn.bing.com/', detector),
+        'QQ': launcher.exe_file_launcher(detector, r'D:\tencent\Bin\QQScLauncher.exe'),
+        'web': launcher.webbrowser_launcher(detector, r'https://cn.bing.com/'),
+        'key': launcher.key_launcher(detector, ['ctrl', 'w']),
+        # 'key': launcher.key_launcher(detector, 'f11'),
     }
     start_func = None
     lock_func = None
