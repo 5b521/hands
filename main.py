@@ -22,12 +22,14 @@ def main(mode = 'office'):
         detector = htm.handDetector(maxHands=1)
     elif mode == 'game':
         detector = htm.handDetector(maxHands=2)
-    mouse_control = mouse.Mouse(wCam, hCam, detector)
-    hands_move_control = handsMove.HandsMove(detector, page.page_move, lambda img: detector.fingersStraight()[1] == 1, True)
-    volume_control = volumeControl.systemVolumeControler(detector)
-    car_controller = game_control_car.car_controller(detector)
-    QQ_exe_file_launcher = launcher.exe_file_launcher(r'D:\tencent\Bin\QQScLauncher.exe', detector)
-    webbrowser_launcher = launcher.webbrowser_launcher(r'https://cn.bing.com/', detector)
+    gesture_map = {
+        'mouse': mouse.Mouse(wCam, hCam, detector),
+        'palm': handsMove.HandsMove(detector, page.page_move, lambda img: detector.fingersStraight()[1] == 1, True),
+        'volume': volumeControl.systemVolumeControler(detector),
+        'car': game_control_car.car_controller(detector),
+        'QQ': launcher.exe_file_launcher(r'D:\tencent\Bin\QQScLauncher.exe', detector),
+        'web': launcher.webbrowser_launcher(r'https://cn.bing.com/', detector),
+    }
     start_func = None
     lock_func = None
     run_func = None
@@ -49,28 +51,16 @@ def main(mode = 'office'):
             #     img = mouse_control.move_mouse()
             if not lock:
                 gesture = hr.hand_recognition(detector)
-                if (gesture == 'mouse'):
-                    lock_func = mouse_control.onLock
-                    run_func = mouse_control.onRun
-                elif (gesture == 'palm'):
-                    start_func = hands_move_control.onStart
-                    lock_func = hands_move_control.onLock
-                    run_func = hands_move_control.onRun
-                    end_func = hands_move_control.onEnd
-                elif (gesture == 'volume'):
-                    lock_func = volume_control.onLock
-                    run_func = volume_control.onRun
-                elif gesture == 'car':
-                    lock_func = car_controller.onLock
-                    run_func = car_controller.onRun
-                elif gesture == 'QQ':
-                    lock_func = QQ_exe_file_launcher.onLock
-                    run_func = QQ_exe_file_launcher.onRun
-                    end_func = QQ_exe_file_launcher.onEnd
-                elif gesture == 'web':
-                    lock_func = webbrowser_launcher.onLock
-                    run_func = webbrowser_launcher.onRun
-                    end_func = webbrowser_launcher.onEnd
+                if gesture in gesture_map:
+                    # 如果存在 onStart 方法
+                    if hasattr(gesture_map[gesture], 'onStart'):
+                        start_func = gesture_map[gesture].onStart
+                    lock_func = gesture_map[gesture].onLock
+                    run_func = gesture_map[gesture].onRun
+                    # 如果存在 onEnd 方法
+                    if hasattr(gesture_map[gesture], 'onEnd'):
+                        end_func = gesture_map[gesture].onEnd
+
                 if lock_func and run_func:
                     if start_func:
                         start_func(img)
