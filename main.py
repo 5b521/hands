@@ -1,4 +1,5 @@
 from cProfile import run
+import webbrowser
 import cv2
 import HandTrackingModule as htm
 import autopy
@@ -10,7 +11,7 @@ from hands_functions import volumeControl
 from features_record import hand_recognition as hr
 from hands_functions import page
 from hands_functions import game_control_car
-from hands_functions import exe_file_launch
+from hands_functions import launcher
 
 
 def main(mode = 'office'):
@@ -29,9 +30,12 @@ def main(mode = 'office'):
     hands_move_control = handsMove.HandsMove(detector, page.page_move, lambda img: detector.fingersStraight()[1] == 1, True)
     volume_control = volumeControl.systemVolumeControler(detector)
     car_controller = game_control_car.car_controller(detector)
-    QQ_exe_file_launcher = exe_file_launch.run_exe_file(r'D:\tencent\Bin\QQScLauncher.exe',detector)
+    QQ_exe_file_launcher = launcher.exe_file_launcher(r'D:\tencent\Bin\QQScLauncher.exe', detector)
+    webbrowser_launcher = launcher.webbrowser_launcher(r'https://cn.bing.com/', detector)
+    start_func = None
     lock_func = None
     run_func = None
+    end_func = None
     lock = False
     frame_count = 0
     gesture = ''
@@ -56,6 +60,7 @@ def main(mode = 'office'):
                     start_func = hands_move_control.start
                     lock_func = hands_move_control.isLock
                     run_func = hands_move_control.handleChange
+                    end_func = hands_move_control.handleEnd
                 elif (gesture == 'volume'):
                     lock_func = volume_control.is_volume_control
                     run_func = volume_control.run_volume_control
@@ -64,7 +69,12 @@ def main(mode = 'office'):
                     run_func = car_controller.car_control
                 elif gesture == 'QQ':
                     lock_func = QQ_exe_file_launcher.lock_func
-                    run_func = QQ_exe_file_launcher.Execute
+                    run_func = QQ_exe_file_launcher.execute
+                    end_func = QQ_exe_file_launcher.handleEnd
+                elif gesture == 'web':
+                    lock_func = webbrowser_launcher.lock_func
+                    run_func = webbrowser_launcher.execute
+                    end_func = webbrowser_launcher.handleEnd
                 if lock_func and run_func:
                     if start_func:
                         start_func(img)
@@ -79,6 +89,7 @@ def main(mode = 'office'):
                     lock_func = None
                     run_func = None
                     start_func = None
+                    end_func = None
             frame_count = 0
         else:
             if frame_count > 10:
@@ -87,10 +98,9 @@ def main(mode = 'office'):
                 lock_func = None
                 run_func = None
                 frame_count = 0
-                if gesture == 'palm':
-                    hands_move_control.handleEnd()
-                elif gesture == 'QQ':
-                    QQ_exe_file_launcher.handleEnd()
+                if end_func:
+                    end_func()
+                end_func = None
             frame_count += 1
 
         cTime = time.time()
