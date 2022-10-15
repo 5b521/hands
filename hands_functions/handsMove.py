@@ -23,7 +23,7 @@ class HandsMove:
         '''
 
         # 回调函数
-        self.onEnd = onEnd
+        self.end_fun = onEnd
         self.isLockFunc = isLockFunc
         self.usingOldLockFunc = usingOldLockFunc
         self.result = None
@@ -70,8 +70,8 @@ class HandsMove:
         self.track.clear()
         self.result = result
         self.useful = useful
-        if self.lock and callable(self.onEnd):
-            self.onEnd(self)
+        if self.lock and callable(self.end_fun):
+            self.end_fun(self)
         self.lock = False
 
     def onEnd(self):
