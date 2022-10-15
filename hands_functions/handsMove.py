@@ -57,7 +57,7 @@ class HandsMove:
         # 是否仍然继续识别
         self.lock = False
 
-    def start(self, img):
+    def onStart(self, img):
         self.lock = True
         self.img = img
         lmList = self.detector.findPosition(img)  # 获取得到坐标点的列表
@@ -74,7 +74,7 @@ class HandsMove:
             self.onEnd(self)
         self.lock = False
 
-    def handleEnd(self):
+    def onEnd(self):
         '''
         当原点发生变化时, 触发的函数, 进行一系列处理
         '''
@@ -135,11 +135,11 @@ class HandsMove:
                 return self.end(getZStr())
         return self.end('未识别到手势', False)
 
-    def isLock(self, img):
+    def onLock(self, img):
         self.img = img
         return self.lock
 
-    def handleChange(self):
+    def onRun(self):
 
         self.cTime = time.time()
 
@@ -168,12 +168,12 @@ class HandsMove:
                     self.standardUnit = self.lastUnit
                 if self.isLockFunc:
                     if self.isLockFunc(self.img) == False:
-                        self.handleEnd()
+                        self.onEnd()
                 if not self.isLockFunc or self.usingOldLockFunc:
                     # 坐标相对原点发生变化, 但相对上一秒坐标没有发生较大变化, 则更新坐标, 表明结束
                     if (abs(wristPos[1] - self.originPos[0]) / self.unit > self.distFromOrigin or abs(wristPos[2] - self.originPos[1]) / self.unit > self.distFromOrigin) \
                             and abs(wristPos[1] - self.lastPos[0]) / self.unit < self.posChange and abs(wristPos[2] - self.lastPos[1]) / self.unit < self.posChange:
-                        self.handleEnd()
+                        self.onEnd()
                         self.originPos = self.lastPos
                 # 更新上一秒的信息
                 self.lastTime = self.cTime

@@ -1,7 +1,6 @@
 import time
 import numpy as np
 import autopy
-import HandTrackingModule as htm
 import cv2
 import sys
 sys.path.append("..")
@@ -30,7 +29,7 @@ class Mouse():
     # print((wCam - frameR, hCam - frameR))
     # 2. 判断食指和中指是否伸出
 
-    def is_mouse_gesture(self, img):
+    def onLock(self, img):
         self.img = img
         self.fingers = self.detector.fingersStraight()
         if self.fingers[1] == 1:
@@ -38,7 +37,7 @@ class Mouse():
         else:
             return False
 
-    def move_mouse(self):
+    def onRun(self):
 
         cv2.rectangle(self.img, (self.frameR, self.frameR), (self.wCam - self.frameR,
                       self.hCam - self.frameR), (0, 255, 0), 2,  cv2.FONT_HERSHEY_PLAIN)

@@ -122,12 +122,12 @@ class systemVolumeControler:
         self.vlc = volumeControler()
         self.d = detector
 
-    def is_volume_control(self, img):
+    def onLock(self, img):
         # frame binded
         self.result = self.meter.is_control(img)
         return self.result
 
-    def run_volume_control(self):
+    def onRun(self):
         img, dist = self.meter.run_control(draw=self.result)
         # if dist > 1 and self.result:
         #     if self.timeRatio and time.time() - self.timeRatio[0] < 0.2:
@@ -167,8 +167,8 @@ if __name__ == "__main__":
         img = detector.findHands(img)
         lmList = detector.findPosition(img, draw=False)
         if len(lmList) != 0:
-            if volume_control.is_volume_control(img):
-                img = volume_control.run_volume_control()
+            if volume_control.onLock(img):
+                img = volume_control.onRun()
 
         # 终端输出手势信息
         # if len(lmList) != 0:

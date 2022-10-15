@@ -1,7 +1,6 @@
 import os
 import webbrowser
 import cv2
-from features_record import hand_recognition
 
 
 class launcher:
@@ -12,7 +11,7 @@ class launcher:
         self.execute_func = execute_func
         self.FUp = None
 
-    def lock_func(self,img):
+    def onLock(self,img):
         self.img = img
         if not self.FUp:
             self.FUp = self.detector.fingersUp()
@@ -22,10 +21,10 @@ class launcher:
         else:
             return True
         
-    def execute(self):
+    def onRun(self):
         # path =  repr(self.str)
         if not self.is_executed:
-            print('execute')
+            # print('execute')
             self.execute_func()
             self.is_executed = True
         else:
@@ -34,7 +33,7 @@ class launcher:
                 cv2.circle(self.img, (self.detector.lmList[4 * id][1], self.detector.lmList[4 * id][2]), 15, (0, 255, 255), cv2.FILLED)
         return self.img
 
-    def handleEnd(self):
+    def onEnd(self):
         self.is_executed = False
         
 

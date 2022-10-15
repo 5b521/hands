@@ -1,9 +1,5 @@
-from cProfile import run
-import webbrowser
 import cv2
 import HandTrackingModule as htm
-import autopy
-import numpy as np
 import time
 from hands_functions import AiVirtualMouse as mouse
 from hands_functions import handsMove
@@ -54,27 +50,27 @@ def main(mode = 'office'):
             if not lock:
                 gesture = hr.hand_recognition(detector)
                 if (gesture == 'mouse'):
-                    lock_func = mouse_control.is_mouse_gesture
-                    run_func = mouse_control.move_mouse
+                    lock_func = mouse_control.onLock
+                    run_func = mouse_control.onRun
                 elif (gesture == 'palm'):
-                    start_func = hands_move_control.start
-                    lock_func = hands_move_control.isLock
-                    run_func = hands_move_control.handleChange
-                    end_func = hands_move_control.handleEnd
+                    start_func = hands_move_control.onStart
+                    lock_func = hands_move_control.onLock
+                    run_func = hands_move_control.onRun
+                    end_func = hands_move_control.onEnd
                 elif (gesture == 'volume'):
-                    lock_func = volume_control.is_volume_control
-                    run_func = volume_control.run_volume_control
+                    lock_func = volume_control.onLock
+                    run_func = volume_control.onRun
                 elif gesture == 'car':
-                    lock_func = car_controller.is_car_controller
-                    run_func = car_controller.car_control
+                    lock_func = car_controller.onLock
+                    run_func = car_controller.onRun
                 elif gesture == 'QQ':
-                    lock_func = QQ_exe_file_launcher.lock_func
-                    run_func = QQ_exe_file_launcher.execute
-                    end_func = QQ_exe_file_launcher.handleEnd
+                    lock_func = QQ_exe_file_launcher.onLock
+                    run_func = QQ_exe_file_launcher.onRun
+                    end_func = QQ_exe_file_launcher.onEnd
                 elif gesture == 'web':
-                    lock_func = webbrowser_launcher.lock_func
-                    run_func = webbrowser_launcher.execute
-                    end_func = webbrowser_launcher.handleEnd
+                    lock_func = webbrowser_launcher.onLock
+                    run_func = webbrowser_launcher.onRun
+                    end_func = webbrowser_launcher.onEnd
                 if lock_func and run_func:
                     if start_func:
                         start_func(img)

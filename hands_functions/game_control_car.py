@@ -1,4 +1,3 @@
-from asyncio.windows_events import NULL
 import sys
 sys.path.append("..")
 import time
@@ -33,11 +32,11 @@ class car_controller:
             # print(t)
             self.kc.keyup(key)
     
-    def is_car_controller(self,img):
+    def onLock(self,img):
         self.img = img
         return True 
 
-    def car_control(self):
+    def onRun(self):
         # tt = time.time()
         # print('here')
         # if tt - self.Last_time > 5:
@@ -95,8 +94,8 @@ if __name__ == "__main__":
 
             # if mouse_control.is_mouse_gesture(img):
             #     img = mouse_control.move_mouse()
-            car_controller.is_car_controller(img)
-            car_controller.car_control()
+            car_controller.onLock(img)
+            car_controller.onRun()
                     
         cTime = time.time()
         fps = 1 / (cTime - pTime)
