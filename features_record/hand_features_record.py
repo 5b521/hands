@@ -131,5 +131,6 @@ if __name__ == "__main__":
     # features_record('car')  # 体感游戏
     # features_record('QQ')  # 打开QQ
     # features_record('web')  # 打开网页
-    features_record('key')  # 按键
+    # features_record('two')  # 按键
+    features_record('three')  # 按键
 

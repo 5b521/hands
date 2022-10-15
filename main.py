@@ -29,8 +29,12 @@ def main(mode = 'office'):
         'volume': volumeControl.systemVolumeControler(detector),
         'car': game_control_car.car_controller(detector),
         'QQ': launcher.exe_file_launcher(detector, r'D:\tencent\Bin\QQScLauncher.exe'),
-        'web': launcher.webbrowser_launcher(detector, r'https://cn.bing.com/'),
         'key': launcher.key_launcher(detector, ['ctrl', 'w']),
+        'web': {
+            'mouse': launcher.webbrowser_launcher(detector, r'https://cn.bing.com/'),
+            'two': launcher.webbrowser_launcher(detector, r'https://www.bilibili.com/'),
+            'exit': 'key',
+        },
         # 'key': launcher.key_launcher(detector, 'f11'),
     }
     start_func = None
@@ -38,6 +42,7 @@ def main(mode = 'office'):
     run_func = None
     end_func = None
     lock = False
+    current_map = gesture_map
     frame_count = 0
     gesture = ''
 
@@ -54,15 +59,25 @@ def main(mode = 'office'):
             #     img = mouse_control.move_mouse()
             if not lock:
                 gesture = hr.hand_recognition(detector)
-                if gesture in gesture_map:
+                # 如果要退出
+                if 'exit' in current_map and current_map['exit'] == gesture:
+                    current_map = gesture_map
+                    print('exit')
+                    continue
+                if gesture in current_map:
+                    # 如果嵌套
+                    if isinstance(current_map[gesture], dict):
+                        current_map = current_map[gesture]
+                        print('enter', gesture)
+                        continue
                     # 如果存在 onStart 方法
-                    if hasattr(gesture_map[gesture], 'onStart'):
-                        start_func = gesture_map[gesture].onStart
-                    lock_func = gesture_map[gesture].onLock
-                    run_func = gesture_map[gesture].onRun
+                    if hasattr(current_map[gesture], 'onStart'):
+                        start_func = current_map[gesture].onStart
+                    lock_func = current_map[gesture].onLock
+                    run_func = current_map[gesture].onRun
                     # 如果存在 onEnd 方法
-                    if hasattr(gesture_map[gesture], 'onEnd'):
-                        end_func = gesture_map[gesture].onEnd
+                    if hasattr(current_map[gesture], 'onEnd'):
+                        end_func = current_map[gesture].onEnd
 
                 if lock_func and run_func:
                     if start_func:

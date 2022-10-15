@@ -25,7 +25,7 @@ class launcher:
     def onRun(self):
         # path =  repr(self.str)
         if not self.is_executed:
-            print('execute')
+            # print('execute')
             self.execute_func()
             self.is_executed = True
         else:
