@@ -10,8 +10,6 @@ file_dir = os.path.dirname(absolutepath)
 
 Path = os.path.join(file_dir, 'hand_features.json')
 
-f = open(Path, encoding='utf-8', mode='r')
-
 gestures = []
 
 with open(Path, encoding='utf-8', mode='r') as f:
@@ -53,7 +51,18 @@ with open(Path, encoding='utf-8', mode='r') as f:
 #   "tag": "mouse"
 # }
 ############################################################################################################
+Path2 = os.path.join(file_dir, 'FingerClose_feature.json')
 
+f = open(Path2, encoding='utf-8', mode='r')
+
+FClose_feature = []
+
+with open(Path2, encoding='utf-8', mode='r') as f:
+    FClose_feature = json.loads(f.read())
+
+def FClose_recogenize():
+
+    return FClose_feature
 
 def hand_recognition(detector, diff=10):
     hands = {}

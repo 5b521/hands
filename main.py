@@ -27,8 +27,8 @@ def main(mode = 'office'):
         'palm': handsMove.HandsMove(detector, page.page_move, lambda img: detector.fingersStraight()[1] == 1, True),
         'volume': volumeControl.systemVolumeControler(detector),
         'car': game_control_car.car_controller(detector),
-        'QQ': launcher.exe_file_launcher(r'D:\tencent\Bin\QQScLauncher.exe', detector),
-        'web': launcher.webbrowser_launcher(r'https://cn.bing.com/', detector),
+        'web': launcher.exe_file_launcher(r'D:\tencent\Bin\QQScLauncher.exe', detector),
+        'QQ': launcher.webbrowser_launcher(r'https://www.bilibili.com/', detector),
     }
     start_func = None
     lock_func = None

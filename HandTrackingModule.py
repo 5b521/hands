@@ -3,7 +3,8 @@ import mediapipe as mp
 import time
 import math
 import numpy as np
-
+import keyboard as key
+from features_record import hand_recognition as hr
 # self.results.multi_hand_world_landmarks
 # 以手的几何中心为原点建立三维坐标系
 
@@ -24,6 +25,8 @@ class handDetector():
             self.mode, self.maxHands, self.model_complexity, self.detectionCon, self.trackCon)
         self.mpDraw = mp.solutions.drawing_utils
         self.tipIds = [4, 8, 12, 16, 20]
+        self.FClose_set = hr.FClose_recogenize()
+
 
     def findHands(self, img, draw=True):
         imgRGB = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
@@ -120,6 +123,8 @@ class handDetector():
         d2 = self.results.multi_hand_world_landmarks[hand_num].landmark[dot2]
 
         return [d2.x - d1.x, d2.y - d1.y, d2.z-d1.z]
+
+
     def fingersUp(self, hand_num=0):
         self.FUp = []
         # 大拇指
@@ -157,29 +162,31 @@ class handDetector():
         # totalFingers = fingers.count(1)
         return self.FUp
 
+                            
     def close_together(self, hand_num=0):
 
         # 只记录四个手指是否并拢的值，从大拇指与食指到  无名指与小拇指
         FClose = []
-
+        
+            
         self.fingersUp(hand_num)
 
-        if self.findDistance(4, 5, hand_num) < 3 and (self.FUp[0] & self.FUp[1]):
+        if self.findDistance(4, 5, hand_num) < self.FClose_set[0]   and ((not self.FUp[0]) & self.FUp[1]):
             FClose.append(1)
         else:
             FClose.append(0)
 
-        if self.findDistance(8, 12, hand_num) < 2.5 and (self.FUp[1] & self.FUp[2]):
+        if self.findDistance(8, 12, hand_num) < self.FClose_set[1] and (self.FUp[1] & self.FUp[2]):
             FClose.append(1)
         else:
             FClose.append(0)
 
-        if self.findDistance(16, 12, hand_num) < 2 and (self.FUp[2] & self.FUp[3]):
+        if self.findDistance(16, 12, hand_num) < self.FClose_set[2] and (self.FUp[2] & self.FUp[3]):
             FClose.append(1)
         else:
             FClose.append(0)
 
-        if self.findDistance(16, 20, hand_num) < 3 and (self.FUp[3] & self.FUp[4]):
+        if self.findDistance(15, 20, hand_num) < self.FClose_set[3] and (self.FUp[3] & self.FUp[4]):
             FClose.append(1)
         else:
             FClose.append(0)
@@ -331,15 +338,21 @@ def main():
             # v1,v2 = detector.direction('Left')
             # print(v1,v2)
             # print(cx,cy,cz)
-            # FClose = detector.close_together()
+            if detector.FClose_set:
+                FClose = detector.close_together()
+                for i in range(0, 4):
+                    if (FClose[i] == 1):
+                        cv2.circle(
+                            img, (lmList[(i+1)*4][1], lmList[(i+1)*4][2]), 15, (0, 0, 255), cv2.FILLED)
             # print(FClose[0])
             # FUp = detector.fingersUp()
-            FStraight = detector.fingersUp()
-            for i in range(0, 5):
-                if (FStraight[i] == 1):
-                    cv2.circle(
-                        img, (lmList[(i+1)*4][1], lmList[(i+1)*4][2]), 15, (0, 0, 255), cv2.FILLED)
+            # FStraight = detector.fingersUp()
+            # for i in range(0, 5):
+            #     if (FStraight[i] == 1):
+            #         cv2.circle(
+            #             img, (lmList[(i+1)*4][1], lmList[(i+1)*4][2]), 15, (0, 0, 255), cv2.FILLED)
             # if(FStraight[0] == 1):
+            
             #     print("good")
             # else:
             #     print("bad")
