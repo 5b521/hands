@@ -56,17 +56,23 @@ class car_controller:
 
                 if angle < 5:
                     self.kc.release_conflicting_keys('lr')
+                elif angle <20:
+                    self.press_key(left_right, 0.05)
+                elif angle < 30:
+                    self.press_key(left_right, 0.1)
+                elif angle < 45:
+                    self.press_key(left_right, 0.2)
                 else:
-                    self.press_key(left_right, angle/360)
-            
-            Left_Fup = self.detector.fingersUp(self.detector.hdDict['Left'])
-            Right_Fup = self.detector.fingersUp(self.detector.hdDict['Right'])
+                    self.press_key(left_right, 0.5)
+     
+            Left_Fup = self.detector.findDistance(4,5,self.detector.hdDict['Left']) > 3.5
+            Right_Fup = self.detector.findDistance(4,5,self.detector.hdDict['Right']) > 3.5
 
-            if Right_Fup[0] and not Left_Fup[0]:
+            if Right_Fup and not Left_Fup:
                 # 前进
                 if not self.kc.is_keydown('f'):
                     self.kc.keydown('f')
-            elif not Right_Fup[0] and Left_Fup[0]:
+            elif not Right_Fup and Left_Fup:
                 # 后退
                 if not self.kc.is_keydown('b'):
                     self.kc.keydown('b')
