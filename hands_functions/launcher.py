@@ -12,7 +12,7 @@ class launcher:
         self.execute_func = execute_func
         self.FUp = None
 
-    def onLock(self,img):
+    def onLock(self, img):
         self.img = img
         if not self.FUp:
             self.FUp = self.detector.fingersUp()
