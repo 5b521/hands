@@ -117,7 +117,7 @@ def features_record(tag):
         fps = 1 / (cTime - pTime)
         pTime = cTime
 
-        cv2.putText(img, 'fps:' + str(int(fps)), (10, 70),
+        cv2.putText(img, f'Press Space for "{tag}"', (10, 70),
                     cv2.FONT_HERSHEY_PLAIN, 3, (255, 0, 255), 3)
         cv2.imshow('Image', img)
         cv2.waitKey(1)

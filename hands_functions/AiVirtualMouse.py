@@ -11,7 +11,7 @@ sys.path.append("..")
 
 class Mouse():
 
-    def __init__(self, wCam, hCam, Detector):
+    def __init__(self, Detector, wCam, hCam):
 
         self.frameR = 150
         self.smoothening = 5

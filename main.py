@@ -24,7 +24,7 @@ def main(mode = 'office'):
     elif mode == 'game':
         detector = htm.handDetector(maxHands=2)
     gesture_map = {
-        'mouse': mouse.Mouse(wCam, hCam, detector),
+        'mouse': mouse.Mouse(detector, wCam, hCam),
         'palm': handsMove.HandsMove(detector, page.page_move, lambda img: detector.fingersStraight()[1] == 1, True),
         'volume': volumeControl.systemVolumeControler(detector),
         'car': game_control_car.car_controller(detector),
@@ -43,6 +43,7 @@ def main(mode = 'office'):
     end_func = None
     lock = False
     current_map = gesture_map
+    current_map_name = 'default'
     frame_count = 0
     gesture = ''
 
@@ -62,12 +63,14 @@ def main(mode = 'office'):
                 # 如果要退出
                 if 'exit' in current_map and current_map['exit'] == gesture:
                     current_map = gesture_map
+                    current_map_name = 'default'
                     print('exit')
                     continue
                 if gesture in current_map:
                     # 如果嵌套
                     if isinstance(current_map[gesture], dict):
                         current_map = current_map[gesture]
+                        current_map_name = gesture
                         print('enter', gesture)
                         continue
                     # 如果存在 onStart 方法
@@ -94,13 +97,16 @@ def main(mode = 'office'):
                     run_func = None
                     start_func = None
                     end_func = None
+                    gesture = ''
             frame_count = 0
         else:
             if frame_count > 10:
                 lock = False
-                start_func = None
                 lock_func = None
                 run_func = None
+                start_func = None
+                end_func = None
+                gesture = ''
                 frame_count = 0
                 if end_func:
                     end_func()
@@ -110,7 +116,7 @@ def main(mode = 'office'):
         cTime = time.time()
         fps = 1 / (cTime - pTime)
         pTime = cTime
-        cv2.putText(img, f'fps:{int(fps)}', [15, 25],
+        cv2.putText(img, f'[{current_map_name}][{gesture}] fps:{int(fps)}', [15, 25],
                     cv2.FONT_HERSHEY_PLAIN, 2, (255, 0, 255), 2)
         cv2.imshow("Image", img)
         cv2.waitKey(1)
