@@ -98,6 +98,6 @@ def hand_recognition(detector, diff=10):
                             if hands[right_left]['FStraight'] == gesture[right_left]['FStraight']\
                                     and hands[right_left]['FUp'] == gesture[right_left]['FUp']\
                                     and hands[right_left]['FClose'] == gesture[right_left]['FClose']\
-                                    and hands[right_left]['TClose'] == gesture[right_left]['TClose']\
                                     and detector.direction_same(gesture[right_left]["FDirection"], hands[right_left]["FDirection"], diff):
+                                    # and hands[right_left]['TClose'] == gesture[right_left]['TClose']\
                                 return gesture['tag']

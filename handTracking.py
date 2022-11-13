@@ -3,7 +3,12 @@ import HandTrackingModule as htm
 import time
 from features_record import hand_recognition as hr
 from hands_functions import launcher
+from gesture_dl.lstm_model import SequenceClassificationPred
 
+
+MODEL_PATH = './gesture_dl/model/ipn_model_new_73.pt'
+GESTURE_NAME = './gesture_dl/data/IPN_Hand/id2gesture_new.csv'
+model = SequenceClassificationPred(MODEL_PATH, gesture_name_map=GESTURE_NAME)
 
 def handTrack(register_map, mode='office'):
 
@@ -27,7 +32,7 @@ def handTrack(register_map, mode='office'):
     current_map_name = 'default'
     frame_count = 0
     gesture = ''
-
+    gesture_name = ''
     while True:
 
         success, img = cap.read()
@@ -40,6 +45,8 @@ def handTrack(register_map, mode='office'):
             # if mouse_control.is_mouse_gesture(img):
             #     img = mouse_control.move_mouse()
             if not lock:
+                results = detector.results.multi_hand_world_landmarks
+                gesture_name, frames = model.send2(results[0], detector.fingersStraight(), detector.fingersUp())
                 gesture = hr.hand_recognition(detector)
                 # 如果要退出
                 if 'exit' in current_map and current_map['exit'] == gesture:
@@ -49,7 +56,12 @@ def handTrack(register_map, mode='office'):
                     run_func = mapChancedLauncher.onRun
                     print('exit')
                 else:
-                    if gesture in current_map:
+                    if gesture_name in current_map:
+                    
+                        # 如果存在 onStart 方法
+                        current_map[gesture_name](gesture_name)
+                        
+                    elif gesture in current_map :
                         # 如果嵌套
                         if isinstance(current_map[gesture], dict):
                             current_map = current_map[gesture]
@@ -86,6 +98,7 @@ def handTrack(register_map, mode='office'):
             frame_count = 0
         else:
             if frame_count > 10:
+                gesture_name, frames = model.clear_queue()
                 lock = False
                 lock_func = None
                 run_func = None

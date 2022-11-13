@@ -5,7 +5,7 @@ from hands_functions import volumeControl
 from hands_functions import page
 from hands_functions import game_control_car
 from hands_functions import launcher
-
+from hands_functions import move_launcher
 
 def register_map(cap, detector):
     wCam = int(cap.get(3))
@@ -18,13 +18,18 @@ def register_map(cap, detector):
         'car': game_control_car.car_controller(detector),
         'QQ': launcher.exe_file_launcher(detector, r'D:\tencent\Bin\QQScLauncher.exe'),
         'key': launcher.key_launcher(detector, ['ctrl', 'w']),
+        'three': launcher.webbrowser_launcher(detector, r'https://www.bilibili.com/v/tech/'),
+        'Throw up':move_launcher.page_move_for_gesture,
+        'Throw down':move_launcher.page_move_for_gesture,
+        'Throw right':move_launcher.page_move_for_gesture,
+        'Throw left':move_launcher.page_move_for_gesture,
         'web': {
+            # 'mouse': mouse.Mouse(detector, wCam, hCam),
             'mouse': launcher.webbrowser_launcher(detector, r'https://cn.bing.com/'),
-            'two': launcher.webbrowser_launcher(detector, r'https://www.bilibili.com/'),
             'exit': 'key',
         },
     }
 
 
 if __name__ == '__main__':
-    handTrack(register_map, 'game')
+    handTrack(register_map, 'office')

@@ -14,7 +14,7 @@ class Mouse():
     def __init__(self, Detector, wCam, hCam):
 
         self.frameR = 150
-        self.smoothening = 5
+        self.smoothening = 3
         self.wCam = wCam
         self.hCam = hCam
         self.plocX, self.plocY = 0, 0

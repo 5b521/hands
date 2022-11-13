@@ -90,8 +90,8 @@ def features_record(tag):
                     record_features[detector.results.multi_handedness[i]
                                     .classification[0].label] = curr_features
 
-            cv2.putText(img, 'good Q,continue E', (10, 70),
-                        cv2.FONT_HERSHEY_PLAIN, 3, (255, 0, 255), 3)
+            # cv2.putText(img, 'good Q,continue E', (10, 70),
+            #             cv2.FONT_HERSHEY_PLAIN, 3, (255, 0, 255), 3)
             cv2.imshow('Image', img)
             cv2.waitKey(1)
 
@@ -132,5 +132,6 @@ if __name__ == "__main__":
     # features_record('QQ')  # 打开QQ
     # features_record('web')  # 打开网页
     # features_record('two')  # 按键
-    features_record('three')  # 按键
+    # features_record('three')  # 按键
+    features_record('key')  # 退出
 
