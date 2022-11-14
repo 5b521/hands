@@ -32,6 +32,10 @@ keycode_map = {
     'scrolllock': 0x46,
     'printscreen': 0xb7,
     'pause': 0xc5,
+    '+': 0x0d,
+    '-': 0x0c,
+    '*': 0x37,
+    '/': 0x35,
 
     '0': 0x0B,
     '1': 0x02,
