@@ -63,6 +63,3 @@ target/
 
 # Filesystem file
 .DS_Store
-
-
-features_record/hand_features.json
