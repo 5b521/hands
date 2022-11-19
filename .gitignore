@@ -63,3 +63,10 @@ target/
 
 # Filesystem file
 .DS_Store
+
+# dataset
+gesture/data/
+!gesture/data/*.py
+# model
+gesture/model/*.pt
+gesture/log
