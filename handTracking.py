@@ -4,9 +4,6 @@ import time
 from features_record import hand_recognition as hr
 from hands_functions import launcher
 from gesture_dl.lstm_model import SequenceClassificationPred
-import win32gui
-import win32con
-import win32com
 
 MODEL_PATH = './gesture_dl/model/ipn_model_new_73.pt'
 GESTURE_NAME = './gesture_dl/data/IPN_Hand/id2gesture_new.csv'
