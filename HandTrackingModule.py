@@ -14,7 +14,7 @@ from features_record import hand_recognition as hr
 
 
 class handDetector():
-    def __init__(self, mode=False, maxHands=1, model_complexity=1, detectionCon=0.3, trackCon=0.3):
+    def __init__(self, mode=False, maxHands=1, model_complexity=1, detectionCon=0.8, trackCon=0.8):
         self.mode = mode
         self.maxHands = maxHands
         self.detectionCon = detectionCon

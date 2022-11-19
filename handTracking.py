@@ -4,7 +4,9 @@ import time
 from features_record import hand_recognition as hr
 from hands_functions import launcher
 from gesture_dl.lstm_model import SequenceClassificationPred
-
+import win32gui
+import win32con
+import win32com
 
 MODEL_PATH = './gesture_dl/model/ipn_model_new_73.pt'
 GESTURE_NAME = './gesture_dl/data/IPN_Hand/id2gesture_new.csv'
@@ -31,6 +33,7 @@ def handTrack(register_map, mode='office'):
     current_map = gesture_map
     current_map_name = 'default'
     frame_count = 0
+    lock_count = 0
     gesture = ''
     gesture_name = ''
     while True:
@@ -47,6 +50,8 @@ def handTrack(register_map, mode='office'):
             if not lock:
                 results = detector.results.multi_hand_world_landmarks
                 gesture_name, frames = model.send2(results[0], detector.fingersStraight(), detector.fingersUp())
+                if gesture_name:
+                    print(gesture_name)
                 gesture = hr.hand_recognition(detector)
                 # 如果要退出
                 if 'exit' in current_map and current_map['exit'] == gesture:
@@ -57,7 +62,7 @@ def handTrack(register_map, mode='office'):
                     print('exit')
                 else:
                     if gesture_name in current_map:
-                    
+
                         # 如果存在 onStart 方法
                         current_map[gesture_name](gesture_name)
                         
@@ -86,19 +91,31 @@ def handTrack(register_map, mode='office'):
                     img = run_func()
                     
             else:
-                lock = lock_func(img)
-                if lock:
-                    img = run_func()
+                if not lock_func(img):
+                    lock_count += 1
                 else:
+                    lock_count = 0
+                
+                if lock_count <= 5:
+                    img = run_func()
+                    lock = True
+                else:
+                    if end_func:
+                        end_func()
+                    lock = False
                     lock_func = None
                     run_func = None
                     start_func = None
                     end_func = None
                     gesture = ''
+                    lock_count = 0
             frame_count = 0
         else:
-            if frame_count > 10:
+            if frame_count > 5:
+                lock_count = 0
                 gesture_name, frames = model.clear_queue()
+                if end_func:
+                    end_func()
                 lock = False
                 lock_func = None
                 run_func = None
@@ -106,8 +123,6 @@ def handTrack(register_map, mode='office'):
                 end_func = None
                 gesture = ''
                 frame_count = 0
-                if end_func:
-                    end_func()
                 end_func = None
             frame_count += 1
 
@@ -117,6 +132,8 @@ def handTrack(register_map, mode='office'):
         cv2.putText(img, f'[{current_map_name}][{gesture}] fps:{int(fps)}', [15, 25],
                     cv2.FONT_HERSHEY_PLAIN, 2, (255, 0, 255), 2)
         cv2.imshow("Image", img)
+
+        cv2.setWindowProperty("Image", cv2.WND_PROP_TOPMOST, 1)
         cv2.waitKey(1)
 
 

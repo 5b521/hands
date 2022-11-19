@@ -32,6 +32,7 @@ class Mouse():
     def onLock(self, img):
         self.img = img
         self.fingers = self.detector.fingersStraight()
+        self.fingersUp = self.detector.fingersUp()
         if self.fingers[1] == 1:
             return True
         else:
@@ -50,7 +51,7 @@ class Mouse():
             # 鼠标按下和放开
             close = self.detector.close_together()
 
-            if self.fingers[2] and close[1] and not self.mouse_click:
+            if self.fingers[2] and self.fingersUp[2] and close[1] and not self.mouse_click:
                 self.mouse_click = True
                 autopy.mouse.toggle(autopy.mouse.Button.LEFT, True)
                 self.press_time = time.time()
@@ -69,7 +70,7 @@ class Mouse():
                 autopy.mouse.toggle(autopy.mouse.Button.LEFT, False)
 
 
-            if not (self.fingers[1] and self.fingers[2] and not close[1]) and (time.time() - self.press_time > self.delay):
+            if not ( self.fingers[2] and self.fingersUp[2] and not close[1]) and (time.time() - self.press_time > self.delay):
                     
                 # 4. 坐标转换： 将食指在窗口坐标转换为鼠标在桌面的坐标
                 # 鼠标坐标

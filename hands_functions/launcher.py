@@ -15,9 +15,9 @@ class launcher:
     def onLock(self, img):
         self.img = img
         if not self.FUp:
-            self.FUp = self.detector.fingersUp()
-        if self.FUp != self.detector.fingersUp():
-            self.is_executed = False
+            self.FUp = self.detector.fingersStraight()
+        if self.FUp != self.detector.fingersStraight():
+            # self.is_executed = False
             return False
         else:
             return True
@@ -35,6 +35,7 @@ class launcher:
         return self.img
 
     def onEnd(self):
+        print('here')
         self.is_executed = False
         
 
