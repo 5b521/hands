@@ -1,18 +1,24 @@
 name: sign_dl
 channels:
+  - conda-forge
   - pytorch
   - defaults
 dependencies:
+  - python=3.7
+  - cudatoolkit=11.6
   - pytorch=1.12.1
   - torchvision=0.13.1
   - torchaudio=0.12.1
-  - cpuonly
-  - python=3.7
-  - pip
   - numpy
+  - pip
   - pip:
     - ipykernel
     - matplotlib
     - opencv-python
     - mediapipe
     - tqdm
+    - autopy
+    - cvzone
+    - keyboard
+    - pycaw
+    - pydirectinput
