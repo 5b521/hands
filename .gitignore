@@ -65,8 +65,8 @@ target/
 .DS_Store
 
 # dataset
-gesture/data/
-!gesture/data/*.py
+gesture_dl/data/
+!gesture_dl/data/*.py
 # model
-gesture/model/*.pt
-gesture/log
+gesture_dl/model/*.pt
+gesture_dl/log
